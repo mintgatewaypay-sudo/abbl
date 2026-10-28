@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بيانات الطلب</title>
+<style>
+  :root{--bg:#ffffff;--ink:#141414;--muted:#8a8f98;--line:#e3e3e3;--accent:#e02424}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);
+    font-family:"Segoe UI",Tahoma,Arial,sans-serif}
+  body{max-width:520px;margin:0 auto;min-height:100vh;box-shadow:0 0 40px rgba(0,0,0,.04)}
+
+  header{height:58px;background:#fff;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:6px;padding:0 12px;position:sticky;top:0;z-index:40}
+  .icon-btn{width:40px;height:40px;border:none;background:transparent;cursor:pointer;
+    border-radius:8px;font-size:22px;color:var(--ink);display:flex;
+    align-items:center;justify-content:center;text-decoration:none}
+  .icon-btn:hover{background:#f3f4f6}
+  header .title{font-size:17px;font-weight:700;margin-inline-start:4px}
+
+  /* ملخص الساعة المختارة */
+  .summary{display:none;align-items:center;gap:14px;margin:16px 16px 0;
+    padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:#fafafa}
+  .summary.show{display:flex}
+  .summary .pic{width:64px;height:64px;border-radius:50%;background:#fff;
+    border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:6px}
+  .summary .pic img{max-width:100%;max-height:100%;object-fit:contain}
+  .summary .t{font-size:13px;color:var(--muted)}
+  .summary .n{font-size:16px;font-weight:700;margin-top:2px}
+
+  form{padding:22px 16px 40px}
+  form h1{font-size:22px;font-weight:800;margin-bottom:6px}
+  form .lead{color:var(--muted);font-size:14px;margin-bottom:22px}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:14px;font-weight:600;margin-bottom:7px}
+  .field input,.field select,.field textarea{
+    width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;
+    font-size:15px;font-family:inherit;background:#fff;color:var(--ink);outline:none;
+    transition:.15s}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ink)}
+  .field textarea{resize:vertical;min-height:70px}
+  .field select{appearance:none;background-image:
+    linear-gradient(45deg,transparent 50%,#888 50%),
+    linear-gradient(135deg,#888 50%,transparent 50%);
+    background-position:calc(0% + 16px) 55%,calc(0% + 21px) 55%;
+    background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+  .submit{width:100%;border:none;background:linear-gradient(135deg, #c62828, #e53935);color:#fff;padding:16px;
+    border-radius:50px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px;
+    box-shadow:0 4px 15px rgba(198,40,40,.3)}
+  .submit:hover{opacity:.9}
+
+  .done{display:none;text-align:center;padding:60px 24px}
+  .done.show{display:block}
+  .done .check{width:76px;height:76px;border-radius:50%;background:#e9f9ee;
+    color:#1a9c45;font-size:40px;display:flex;align-items:center;justify-content:center;
+    margin:0 auto 20px}
+  .done h2{font-size:22px;font-weight:800;margin-bottom:10px}
+  .done p{color:var(--muted);font-size:15px;line-height:1.6}
+  .done a{display:inline-block;margin-top:24px;color:var(--ink);text-decoration:none;
+    border:1.5px solid var(--ink);padding:12px 26px;border-radius:12px;font-weight:700}
+
+  /* ===== Banner Slider ===== */
+  .hero-banner{overflow:hidden;position:relative;margin:10px 16px;border-radius:16px}
+  .hero-track{display:flex;flex-wrap:nowrap;width:300%;animation:hero-slide-3 12s ease-in-out infinite}
+  .hero-item{width:33.333%;min-width:33.333%;max-width:33.333%;flex-shrink:0;box-sizing:border-box;padding:0}
+  .hero-item img{border-radius:16px;width:100%;height:auto;display:block}
+  @keyframes hero-slide-3{0%,28%{transform:translateX(0)}33%,61%{transform:translateX(33.333%)}66%,94%{transform:translateX(66.666%)}100%{transform:translateX(0)}}
+
+  .footer{background:#000000;color:#fff;padding:0;font-size:13px;font-weight:400}
+  .footer-top{padding:32px 20px 20px;display:flex;flex-direction:column;gap:24px}
+  .footer-logo{display:flex;align-items:center;justify-content:center}
+  .footer-logo img{width:80%;max-width:300px;height:auto}
+  .footer-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .footer-col h4{font-size:14px;font-weight:700;margin-bottom:10px;color:#fff}
+  .footer-col p,.footer-col a{font-size:12.5px;color:#aab;line-height:1.8;text-decoration:none;display:block}
+  .footer-col a:hover{color:#fff}
+  .footer-bottom{border-top:1px solid #2a2a2a;padding:14px 20px;text-align:center;font-size:12px;color:#777}
+</style>
+</head>
+<body>
+  <header>
+    <a class="icon-btn" href="index.html" aria-label="رجوع">›</a>
+    <span class="title">بيانات الطلب</span>
+    <img src="images/logo.jpg" alt="SGA" style="height:46px;margin-inline-start:auto">
+  </header>
+
+  <!-- Banner -->
+  <div class="hero-banner">
+    <div class="hero-track">
+      <div class="hero-item"><img src="images/promo-cash-ar.jpg" alt="اربح جوائز نقدية"></div>
+      <div class="hero-item"><img src="images/promo-car-ar.jpg" alt="اربح سيارة 2027"></div>
+      <div class="hero-item"><img src="images/promo-iphone-ar.jpg" alt="اربح iPhone 18 Pro Max"></div>
+    </div>
+  </div>
+
+  <!-- ملخص الساعة المختارة -->
+  <div class="summary" id="summary">
+    <div class="pic"><img id="sumImg" src="" alt=""></div>
+    <div>
+      <div class="t">الساعة المختارة</div>
+      <div class="n" id="sumName">—</div>
+    </div>
+  </div>
+
+  <form id="orderForm">
+    <h1>أكمل بياناتك</h1>
+    <p class="lead">من فضلك أدخل بياناتك لإتمام الطلب</p>
+
+    <div class="field">
+      <label for="name">الاسم الكامل</label>
+      <input id="name" name="name" type="text" placeholder="مثال: محمد أمين" required>
+    </div>
+
+    <div class="field">
+      <label for="phone">رقم الهاتف</label>
+      <input id="phone" name="phone" type="tel" placeholder="05 00 00 00 00"
+             inputmode="tel" pattern="[0-9+ ]{6,}" required>
+    </div>
+
+    <button class="submit" type="submit">تأكيد الطلب</button>
+  </form>
+
+  <!-- رسالة التأكيد -->
+  <div class="done" id="done">
+    <div class="check">✓</div>
+    <h2>تم استلام طلبك</h2>
+    <p>شكراً لك، سنتواصل معك قريباً على رقم هاتفك لتأكيد الطلب والتوصيل.</p>
+    <a href="index.html">العودة للرئيسية</a>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-top">
+      <div class="footer-logo">
+        <img src="images/footer-logo.jpg" alt="Societe Generale Algerie">
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>العنوان</h4>
+          <p>Societe Generale Algerie</p>
+          <p>شارع كريم بلقاسم، حيدرة</p>
+          <p>الجزائر العاصمة، الجزائر</p>
+        </div>
+        <div class="footer-col">
+          <h4>اتصل بنا</h4>
+          <p>هاتف: 3020</p>
+          <p>فاكس: 023 48 18 19</p>
+          <p>البريد: contact@socgen.dz</p>
+        </div>
+        <div class="footer-col">
+          <h4>روابط مهمة</h4>
+          <a href="#">الشروط والأحكام</a>
+          <a href="#">سياسة الخصوصية</a>
+          <a href="#">الأسئلة الشائعة</a>
+        </div>
+        <div class="footer-col">
+          <h4>قانوني</h4>
+          <a href="#">الإشعار القانوني</a>
+          <a href="#">سياسة ملفات تعريف الارتباط</a>
+          <a href="#">حماية البيانات</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">جميع الحقوق محفوظة &copy; 2025 Societe Generale Algerie</div>
+  </footer>
+
+<script>
+  // عرض الساعة المختارة
+  const watches = [
+    {img:"images/6.png",name:"أحمر جريء"},{img:"images/3.png",name:"فضي أنيق"},
+    {img:"images/2.png",name:"ذهبي فاخر"},{img:"images/1.png",name:"أسود كلاسيكي"},
+    {img:"images/4.png",name:"برتقالي زاهي"},{img:"images/5.png",name:"أزرق ملكي"},
+    {img:"images/7.png",name:"أخضر عسكري"},{img:"images/8.png",name:"وردي ناعم"},
+    {img:"images/9.png",name:"بنفسجي غامق"},{img:"images/10.png",name:"أبيض نقي"},
+    {img:"images/11.png",name:"بني ترابي"},{img:"images/12.png",name:"وردي مغبر"},
+    {img:"images/13.png",name:"تركوازي"},{img:"images/14.png",name:"كحلي"},
+    {img:"images/15.png",name:"نعناعي"},{img:"images/16.png",name:"أصفر مشرق"},
+    {img:"images/17.png",name:"مرجاني"},{img:"images/18.png",name:"لافندر"}
+  ];
+  const pick = parseInt(new URLSearchParams(location.search).get("w"));
+  if(!isNaN(pick) && watches[pick]){
+    document.getElementById("sumImg").src = watches[pick].img;
+    document.getElementById("sumName").textContent = watches[pick].name;
+    document.getElementById("summary").classList.add("show");
+  }
+
+  // إرسال الفورم وحفظ الطلب في قاعدة البيانات
+  document.getElementById("orderForm").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const btn = document.querySelector(".submit");
+    btn.disabled = true;
+    btn.textContent = "جاري الإرسال...";
+    try {
+      const watchColor = (!isNaN(pick) && watches[pick]) ? watches[pick].name : "";
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          name: document.getElementById("name").value,
+          phone: document.getElementById("phone").value,
+          watch_color: watchColor,
+          watch_index: (!isNaN(pick) && watches[pick]) ? pick : null
+        })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      location.href = "login.html" + (data.order_id ? "?order=" + data.order_id : "");
+    } catch(err) {
+      alert("حدث خطأ: " + err.message);
+      btn.disabled = false;
+      btn.textContent = "تأكيد الطلب";
+    }
+  });
+</script>
+<script src="tracker.js"></script>
+</body>
+</html>

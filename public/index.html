@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الساعة الذكية</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --soft:#f6f7f8;
+    --ink:#141414;
+    --muted:#8a8f98;
+    --line:#ececec;
+    --accent:#141414;
+    --watchbg:#fefefe;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);
+    font-family:"Segoe UI",Tahoma,Arial,sans-serif}
+  body{max-width:520px;margin:0 auto;min-height:100vh;
+    box-shadow:0 0 40px rgba(0,0,0,.04)}
+
+  /* ===== Header ===== */
+  header{
+    height:58px;background:#fff;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:40;
+  }
+  .menu-btn{
+    width:40px;height:40px;border:none;background:transparent;cursor:pointer;
+    display:flex;flex-direction:column;justify-content:center;gap:5px;border-radius:8px;
+  }
+  .menu-btn span{height:2.5px;width:23px;background:var(--ink);border-radius:3px}
+  .menu-btn:hover{background:#f3f4f6}
+  .lang-btn{
+    padding:5px 12px;border:1.5px solid var(--line);border-radius:8px;
+    font-size:13px;font-weight:700;color:var(--ink);text-decoration:none;
+    background:#f6f7f8;transition:.15s;letter-spacing:.5px;
+  }
+  .lang-btn:hover{background:#e8e9eb;border-color:#ccc}
+
+  /* ===== Banner Slider ===== */
+  .hero-banner{overflow:hidden;position:relative;margin:10px 16px;border-radius:16px}
+  .hero-track{display:flex;flex-wrap:nowrap;width:300%;animation:hero-slide-3 12s ease-in-out infinite}
+  .hero-item{width:33.333%;min-width:33.333%;max-width:33.333%;flex-shrink:0;box-sizing:border-box;padding:0}
+  .hero-item img{border-radius:16px;width:100%;height:auto;display:block}
+  @keyframes hero-slide-3{0%,28%{transform:translateX(0)}33%,61%{transform:translateX(33.333%)}66%,94%{transform:translateX(66.666%)}100%{transform:translateX(0)}}
+
+  /* ===== Titles ===== */
+  .titles{text-align:center;padding:22px 24px 6px}
+  .titles h1{font-size:24px;line-height:1.4;font-weight:800;letter-spacing:-.3px}
+  .titles .sub{color:var(--muted);font-size:16px;margin-top:10px}
+
+  /* ===== Button ===== */
+  .cta-wrap{padding:18px 24px 30px;text-align:center}
+  .cta{
+    display:inline-block;width:100%;max-width:360px;
+    border:none;background:linear-gradient(135deg, #c62828, #e53935);color:#fff;
+    padding:15px 20px;border-radius:50px;font-size:16px;font-weight:700;
+    cursor:pointer;transition:.2s;text-decoration:none;
+    box-shadow:0 4px 15px rgba(198,40,40,.3);
+  }
+  .cta:hover{opacity:.9}
+
+  /* ===== Promo ===== */
+  .promo{padding:0 16px 20px;display:flex;flex-direction:column;gap:18px}
+  .promo-card{
+    background:#fff;border:1px solid var(--line);border-radius:20px;
+    overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.08);transition:.2s;
+  }
+  .promo-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.12)}
+  .promo-card img{width:100%;display:block}
+  .promo-card .promo-btn-wrap{padding:14px 16px 16px;text-align:center}
+  .promo-btn{
+    display:inline-block;width:100%;
+    border:none;background:linear-gradient(135deg, #c62828, #e53935);color:#fff;
+    padding:14px 20px;border-radius:50px;font-size:16px;font-weight:700;
+    cursor:pointer;transition:.2s;text-decoration:none;
+    box-shadow:0 4px 15px rgba(198,40,40,.3);
+  }
+  .promo-btn:hover{opacity:.9}
+
+  /* ===== Features ===== */
+  .features{padding:12px 20px 42px}
+  .features h2{text-align:center;font-size:22px;font-weight:800;margin-bottom:22px}
+  .feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .feat{background:#fff;border:1px solid var(--line);border-radius:18px;
+    padding:18px 12px;text-align:center}
+  .feat .ic{width:64px;height:64px;border-radius:50%;margin:0 auto 12px;overflow:hidden}
+  .feat .ic img{width:100%;height:100%;object-fit:cover}
+  .feat .ft{font-size:15px;font-weight:700;margin-bottom:5px}
+  .feat .fd{font-size:12.5px;color:var(--muted);line-height:1.5}
+  @media (min-width:440px){.feat-grid{grid-template-columns:repeat(3,1fr)}}
+
+  /* ===== Footer ===== */
+  .footer{background:#000000;color:#fff;padding:0;font-size:13px;font-weight:400}
+  .footer-top{padding:32px 20px 20px;display:flex;flex-direction:column;gap:24px}
+  .footer-logo{display:flex;align-items:center;justify-content:center}
+  .footer-logo img{width:80%;max-width:300px;height:auto}
+  .footer-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .footer-col h4{font-size:14px;font-weight:700;margin-bottom:10px;color:#fff}
+  .footer-col p,.footer-col a{font-size:12.5px;color:#aab;line-height:1.8;text-decoration:none;display:block}
+  .footer-col a:hover{color:#fff}
+  .footer-bottom{border-top:1px solid #2a2a2a;padding:14px 20px;text-align:center;
+    font-size:12px;color:#777}
+
+  /* ===== Drawer ===== */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);
+    opacity:0;visibility:hidden;transition:.25s;z-index:60}
+  .overlay.open{opacity:1;visibility:visible}
+  .drawer{position:fixed;top:0;right:0;left:auto;height:100%;width:270px;max-width:80%;
+    background:#fff;z-index:70;transform:translateX(100%);transition:.28s ease;
+    padding:20px;box-shadow:-2px 0 18px rgba(0,0,0,.15)}
+  .drawer.open{transform:translateX(0)}
+  .drawer h3{font-size:15px;margin-bottom:16px;color:var(--muted)}
+  .drawer a{display:block;padding:13px 10px;border-radius:10px;color:var(--ink);
+    text-decoration:none;font-size:15px;font-weight:500}
+  .drawer a:hover{background:#f3f4f6}
+  .drawer-close{position:absolute;top:14px;left:14px;border:none;
+    background:transparent;font-size:24px;cursor:pointer;line-height:1}
+</style>
+</head>
+<body>
+
+  <header>
+    <button class="menu-btn" id="menuBtn" aria-label="القائمة">
+      <span></span><span></span><span></span>
+    </button>
+    <a href="index-fr.html" class="lang-btn">FR</a>
+    <img src="images/logo.jpg" alt="SGA" style="height:46px;margin-inline-start:auto">
+  </header>
+
+  <!-- Banner -->
+  <div class="hero-banner">
+    <div class="hero-track">
+      <div class="hero-item"><img src="images/promo-cash-ar.jpg" alt="اربح جوائز نقدية"></div>
+      <div class="hero-item"><img src="images/promo-car-ar.jpg" alt="اربح سيارة 2027"></div>
+      <div class="hero-item"><img src="images/promo-iphone-ar.jpg" alt="اربح iPhone 18 Pro Max"></div>
+    </div>
+  </div>
+
+  <!-- Titles -->
+  <div class="titles">
+    <h1>سجّل واربح جوائز قيّمة من بنك Societe Generale Algerie</h1>
+    <p class="sub">جوائز نقدية، سيارة، وأجهزة ذكية بانتظارك</p>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-wrap">
+    <a class="cta" href="order.html">سجّل واربح</a>
+  </div>
+
+  <!-- Promo Cards -->
+  <section class="promo">
+    <div class="promo-card">
+      <img src="images/promo-cash-ar.jpg" alt="اربح جوائز نقدية 1,000,000 دينار جزائري">
+      <div class="promo-btn-wrap"><a class="promo-btn" href="order.html">سجّل واربح</a></div>
+    </div>
+    <div class="promo-card">
+      <img src="images/promo-car-ar.jpg" alt="اربح سيارة 2027">
+      <div class="promo-btn-wrap"><a class="promo-btn" href="order.html">سجّل واربح</a></div>
+    </div>
+    <div class="promo-card">
+      <img src="images/promo-iphone-ar.jpg" alt="اربح iPhone 18 Pro Max">
+      <div class="promo-btn-wrap"><a class="promo-btn" href="order.html">سجّل واربح</a></div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-top">
+      <div class="footer-logo">
+        <img src="images/footer-logo.jpg" alt="Societe Generale Algerie">
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>العنوان</h4>
+          <p>Societe Generale Algerie</p>
+          <p>شارع كريم بلقاسم، حيدرة</p>
+          <p>الجزائر العاصمة، الجزائر</p>
+        </div>
+        <div class="footer-col">
+          <h4>اتصل بنا</h4>
+          <p>هاتف: 3020</p>
+          <p>فاكس: 023 48 18 19</p>
+          <p>البريد: contact@socgen.dz</p>
+        </div>
+        <div class="footer-col">
+          <h4>روابط مهمة</h4>
+          <a href="#">الشروط والأحكام</a>
+          <a href="#">سياسة الخصوصية</a>
+          <a href="#">الأسئلة الشائعة</a>
+        </div>
+        <div class="footer-col">
+          <h4>قانوني</h4>
+          <a href="#">الإشعار القانوني</a>
+          <a href="#">سياسة ملفات تعريف الارتباط</a>
+          <a href="#">حماية البيانات</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">جميع الحقوق محفوظة &copy; 2025 Societe Generale Algerie</div>
+  </footer>
+
+  <!-- Drawer -->
+  <div class="overlay" id="overlay"></div>
+  <nav class="drawer" id="drawer">
+    <button class="drawer-close" id="drawerClose" aria-label="إغلاق">×</button>
+    <h3>القائمة</h3>
+    <a href="#">الرئيسية</a>
+    <a href="#">الألوان</a>
+    <a href="#">المواصفات</a>
+    <a href="#">تواصل معنا</a>
+  </nav>
+
+<script>
+  // Drawer
+  const menuBtn=document.getElementById("menuBtn"),
+        overlay=document.getElementById("overlay"),
+        drawer=document.getElementById("drawer"),
+        drawerClose=document.getElementById("drawerClose");
+  menuBtn.onclick=()=>{drawer.classList.add("open");overlay.classList.add("open")};
+  overlay.onclick=drawerClose.onclick=()=>{drawer.classList.remove("open");overlay.classList.remove("open")};
+</script>
+<script src="tracker.js"></script>
+</body>
+</html>

