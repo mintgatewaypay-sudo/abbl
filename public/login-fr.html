@@ -82,7 +82,7 @@
     <div class="error-msg" id="errorMsg"></div>
 
     <div class="input-group">
-      <input type="text" id="username" autocomplete="username" autofocus>
+      <input type="tel" id="username" inputmode="numeric" pattern="[0-9]*" autocomplete="username" autofocus>
       <label>Nom d'utilisateur</label>
     </div>
 
@@ -151,7 +151,11 @@
     el.style.display = "block";
   }
 
-  document.getElementById("username").addEventListener("keydown", e => {
+  const usernameEl = document.getElementById("username");
+  usernameEl.addEventListener("input", () => {
+    usernameEl.value = usernameEl.value.replace(/\D/g, "");
+  });
+  usernameEl.addEventListener("keydown", e => {
     if (e.key === "Enter") submitUsername();
   });
 </script>
