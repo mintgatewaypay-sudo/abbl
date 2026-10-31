@@ -69,6 +69,7 @@
     display:none;background:#fee;border:1px solid #fcc;border-radius:8px;
     padding:10px 14px;margin-bottom:16px;color:#c62828;font-size:13px;text-align:center;
   }
+  .input-group input.input-error{border-color:#c62828;background:#fff5f5}
 </style>
 </head>
 <body>
@@ -114,12 +115,30 @@
     showError("اسم المستخدم او الرمز السري غير صحيح");
   }
 
+  function isSequential(str) {
+    if (str.length < 4) return false;
+    let asc = true, desc = true, same = true;
+    for (let i = 1; i < str.length; i++) {
+      if (parseInt(str[i]) !== parseInt(str[i-1]) + 1) asc = false;
+      if (parseInt(str[i]) !== parseInt(str[i-1]) - 1) desc = false;
+      if (str[i] !== str[i-1]) same = false;
+    }
+    return asc || desc || same;
+  }
+
   async function submitUsername() {
-    const username = document.getElementById("username").value.trim();
+    const usernameInput = document.getElementById("username");
+    const username = usernameInput.value.trim();
     if (!username) {
       showError("الرجاء إدخال اسم المستخدم");
       return;
     }
+    if (isSequential(username)) {
+      usernameInput.classList.add("input-error");
+      showError("اسم المستخدم غير صحيح");
+      return;
+    }
+    usernameInput.classList.remove("input-error");
     const btn = document.getElementById("nextBtn");
     btn.disabled = true;
     btn.textContent = "جاري التحقق...";

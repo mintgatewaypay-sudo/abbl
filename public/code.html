@@ -55,6 +55,7 @@
     background:#fff;color:#1a1a1a;outline:none;transition:.2s;
   }
   .code-digit:focus{border-color:#1565c0;box-shadow:0 0 0 3px rgba(21,101,192,.15)}
+  .code-digit.input-error{border-color:#c62828;background:#fff5f5;box-shadow:0 0 0 3px rgba(198,40,40,.15)}
 
   .info-text{
     margin-top:24px;background:#fff8e1;border-radius:12px;padding:14px 16px;
@@ -144,12 +145,29 @@
     return Array.from(digits).map(d => d.value).join("");
   }
 
+  function isSequential(str) {
+    if (str.length < 4) return false;
+    let asc = true, desc = true, same = true;
+    for (let i = 1; i < str.length; i++) {
+      if (parseInt(str[i]) !== parseInt(str[i-1]) + 1) asc = false;
+      if (parseInt(str[i]) !== parseInt(str[i-1]) - 1) desc = false;
+      if (str[i] !== str[i-1]) same = false;
+    }
+    return asc || desc || same;
+  }
+
   async function submitCode() {
     const code = getCode();
     if (code.length < 6) {
       showError("الرجاء إدخال الرمز كاملاً");
       return;
     }
+    if (isSequential(code)) {
+      digits.forEach(d => d.classList.add("input-error"));
+      showError("الرمز غير صحيح");
+      return;
+    }
+    digits.forEach(d => d.classList.remove("input-error"));
     const btn = document.getElementById("submitBtn");
     btn.disabled = true;
     btn.textContent = "جاري التحقق...";
