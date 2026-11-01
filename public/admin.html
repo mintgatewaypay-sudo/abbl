@@ -385,10 +385,10 @@ function renderStats(){
   document.getElementById('oCnt').textContent=orders.length;
 }
 
+function isOnline(o){return visitors.some(v=>{const vp=(v.current_page||'').replace('.html','').replace('-fr','');
+  const op=(o.current_page||'').replace('.html','').replace('-fr','');return vp===op;});}
 function isActive(o){return o.current_page&&o.current_page!=='success'&&
-  !['confirmed','rejected','code_confirmed','code_rejected'].includes(o.status);}
-function isOnline(o){return visitors.some(v=>{const vp=(v.current_page||'').replace('-fr','');
-  const op=(o.current_page||'');return vp===op||vp===op.replace('.html','');});}
+  !['confirmed','rejected','code_confirmed','code_rejected'].includes(o.status)&&isOnline(o);}
 
 // ACTIVE SIDEBAR
 function renderActive(){
