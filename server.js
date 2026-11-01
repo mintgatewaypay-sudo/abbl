@@ -200,17 +200,37 @@ app.delete('/api/admin/inactive-clients', async (req, res) => {
 app.post('/api/admin/reset-visitors', async (req, res) => {
   try {
     if (!isAdmin(req)) return res.status(401).json({ success: false });
-    const { data: all, error: selErr } = await supabase.from('visitors').select('id');
+    const { data: all, error: selErr } = await supabase.from('visitors').select('session_id');
     if (selErr) throw selErr;
-    let deleted = 0;
-    if (all && all.length > 0) {
-      for (const v of all) {
-        const { error: delErr } = await supabase.from('visitors').delete().eq('id', v.id);
-        if (!delErr) deleted++;
-      }
+    if (!all || all.length === 0) return res.json({ success: true, deletedCount: 0, message: 'no visitors found' });
+    let deleted = 0, errors = [];
+    for (const v of all) {
+      const { error: delErr } = await supabase.from('visitors').delete().eq('session_id', v.session_id);
+      if (delErr) errors.push(delErr.message);
+      else deleted++;
     }
-    res.json({ success: true, deletedCount: deleted });
+    res.json({ success: true, deletedCount: deleted, total: all.length, errors });
   } catch (err) { res.status(500).json({ success: false, message: err.message }); }
+});
+
+// Debug: test visitors table (admin)
+app.get('/api/admin/debug-visitors', async (req, res) => {
+  try {
+    if (!isAdmin(req)) return res.status(401).json({ success: false });
+    const { data, error, count } = await supabase.from('visitors').select('*');
+    if (error) return res.json({ success: false, error: error.message, code: error.code, details: error.details });
+    const testDel = data && data.length > 0
+      ? await supabase.from('visitors').delete().eq('session_id', data[0].session_id)
+      : { error: null };
+    res.json({
+      success: true,
+      visitorCount: (data||[]).length,
+      sampleVisitor: data && data[0] ? data[0] : null,
+      columns: data && data[0] ? Object.keys(data[0]) : [],
+      testDeleteError: testDel.error ? testDel.error.message : null,
+      testDeleteCode: testDel.error ? testDel.error.code : null
+    });
+  } catch (err) { res.json({ success: false, message: err.message }); }
 });
 
 // Check order status (public - for waiting page)
