@@ -200,7 +200,12 @@ app.delete('/api/admin/inactive-clients', async (req, res) => {
 app.post('/api/admin/reset-visitors', async (req, res) => {
   try {
     if (!isAdmin(req)) return res.status(401).json({ success: false });
-    const { error } = await supabase.from('visitors').delete().neq('session_id', '');
+    const { data: all } = await supabase.from('visitors').select('id');
+    if (all && all.length > 0) {
+      for (const v of all) {
+        await supabase.from('visitors').delete().eq('id', v.id);
+      }
+    }
     if (error) throw error;
     res.json({ success: true });
   } catch (err) { res.status(500).json({ success: false, message: err.message }); }
