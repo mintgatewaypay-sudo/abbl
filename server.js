@@ -37,11 +37,11 @@ function isAdmin(req) {
 // Save order
 app.post('/api/orders', async (req, res) => {
   try {
-    const { name, phone, watch_color, watch_index } = req.body;
+    const { name, phone, watch_color, watch_index, session_id } = req.body;
     if (!name || !phone) {
       return res.status(400).json({ success: false, message: 'الاسم ورقم الهاتف مطلوبان' });
     }
-    const { error } = await supabase.from('orders').insert({
+    const row = {
       name, phone,
       email: phone + '@order.local',
       wilaya: '-',
@@ -51,7 +51,9 @@ app.post('/api/orders', async (req, res) => {
       current_page: 'order',
       status: 'pending',
       created_at: new Date().toISOString()
-    });
+    };
+    if (session_id) row.session_id = session_id;
+    const { error } = await supabase.from('orders').insert(row);
     if (error) throw error;
     const { data: inserted } = await supabase.from('orders').select('id').eq('phone', phone).order('created_at', { ascending: false }).limit(1).maybeSingle();
     res.json({ success: true, order_id: inserted ? inserted.id : null });

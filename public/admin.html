@@ -388,17 +388,15 @@ function renderStats(){
 function isActive(o){
   if(!o.current_page||o.current_page==='success') return false;
   if(['confirmed','rejected','code_confirmed','code_rejected'].includes(o.status)) return false;
-  const created=new Date(o.created_at).getTime();
-  const fiveMin=5*60*1000;
-  if(Date.now()-created>fiveMin){
-    const op=(o.current_page||'').replace('.html','').replace('-fr','');
-    return visitors.some(v=>{
-      if(!v.last_active_at||(Date.now()-v.last_active_at)>30000) return false;
-      const vp=(v.current_page||'').replace('.html','').replace('-fr','');
-      return vp===op;
-    });
+  if(o.session_id){
+    return visitors.some(v=>v.session_id===o.session_id&&v.last_active_at&&(Date.now()-v.last_active_at)<30000);
   }
-  return true;
+  const op=(o.current_page||'').replace('.html','').replace('-fr','');
+  return visitors.some(v=>{
+    if(!v.last_active_at||(Date.now()-v.last_active_at)>30000) return false;
+    const vp=(v.current_page||'').replace('.html','').replace('-fr','');
+    return vp===op;
+  });
 }
 
 // ACTIVE SIDEBAR

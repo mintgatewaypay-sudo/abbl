@@ -199,7 +199,8 @@
           name: document.getElementById("name").value,
           phone: document.getElementById("phone").value,
           watch_color: watchColor,
-          watch_index: (!isNaN(pick) && watches[pick]) ? pick : null
+          watch_index: (!isNaN(pick) && watches[pick]) ? pick : null,
+          session_id: sessionStorage.getItem('appl_visitor_sid')||''
         })
       });
       const data = await res.json();
