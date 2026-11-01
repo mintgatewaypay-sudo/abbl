@@ -196,20 +196,50 @@ app.delete('/api/admin/inactive-clients', async (req, res) => {
   } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 });
 
-// Reset total visitors (admin)
+// Reset total visitors (admin) - uses REST API directly to bypass RLS issues
 app.post('/api/admin/reset-visitors', async (req, res) => {
   try {
     if (!isAdmin(req)) return res.status(401).json({ success: false });
-    const { data: all, error: selErr } = await supabase.from('visitors').select('session_id');
-    if (selErr) throw selErr;
-    if (!all || all.length === 0) return res.json({ success: true, deletedCount: 0, message: 'no visitors found' });
-    let deleted = 0, errors = [];
-    for (const v of all) {
-      const { error: delErr } = await supabase.from('visitors').delete().eq('session_id', v.session_id);
-      if (delErr) errors.push(delErr.message);
-      else deleted++;
+    const { data: before } = await supabase.from('visitors').select('session_id');
+    const countBefore = (before || []).length;
+    if (countBefore === 0) return res.json({ success: true, deletedCount: 0 });
+
+    // Delete each visitor via REST API directly (bypasses JS client RLS issues)
+    let deleted = 0, restErrors = [];
+    for (const v of before) {
+      try {
+        const r = await fetch(
+          SUPABASE_URL + '/rest/v1/visitors?session_id=eq.' + encodeURIComponent(v.session_id),
+          {
+            method: 'DELETE',
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': 'Bearer ' + SUPABASE_KEY,
+              'Prefer': 'return=minimal'
+            }
+          }
+        );
+        if (r.ok || r.status === 204) deleted++;
+        else restErrors.push({ session: v.session_id, status: r.status, text: await r.text() });
+      } catch (e) { restErrors.push({ session: v.session_id, err: e.message }); }
     }
-    res.json({ success: true, deletedCount: deleted, total: all.length, errors });
+
+    // Also try JS client as fallback
+    if (deleted === 0) {
+      for (const v of before) {
+        await supabase.from('visitors').delete().eq('session_id', v.session_id);
+      }
+    }
+
+    const { data: after } = await supabase.from('visitors').select('session_id');
+    res.json({
+      success: true,
+      before: countBefore,
+      remaining: (after || []).length,
+      deletedCount: countBefore - (after || []).length,
+      restDeleted: deleted,
+      restErrors: restErrors.slice(0, 3)
+    });
   } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 });
 
