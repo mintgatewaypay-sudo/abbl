@@ -634,7 +634,7 @@ function openVM(filter){
 
     // Footer
     h+=`<div class="vm-footer"><span class="note">يتم احتساب إجمالي الزوار التراكمي تلقائياً عند أول زيارة لكل جلسة فريدة.</span>
-      <button style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif" onclick="resetVisitors()">⚠️ تصفير عداد الزوار</button></div>`;
+      <button style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif" onclick="resetVisitors()">⚠️ تصفير جميع البيانات</button></div>`;
 
     h+=`</div></div>`; // modal-body + modal
     document.getElementById('vModal').innerHTML=h;
@@ -653,8 +653,12 @@ async function vmRedir(sid,page){
   setTimeout(()=>{if(msg)msg.style.display='none';},3000);
 }
 async function resetVisitors(){
-  if(!confirm('هل أنت متأكد من تصفير عداد الزوار؟'))return;
-  await api('POST','/api/admin/reset-visitors');await loadVisitors();showNotif('✅ تم تصفير العداد');closeVM();
+  if(!confirm('⚠️ هل أنت متأكد؟ سيتم حذف جميع الزوار وجميع الطلبات نهائياً!'))return;
+  const r=await api('POST','/api/admin/reset-visitors');
+  orders=[];visitors=[];allVisitors=[];prevIds=new Set();selId=null;
+  renderStats();renderActive();renderOrders();closeDetail();closeVM();
+  await loadOrders();await loadVisitors();
+  showNotif('✅ تم تصفير جميع البيانات — الزوار: '+(r.deletedVisitors||0)+' | الطلبات: '+(r.deletedOrders||0));
 }
 
 checkAuth();
