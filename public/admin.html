@@ -388,15 +388,8 @@ function renderStats(){
 function isActive(o){
   if(!o.current_page||o.current_page==='success') return false;
   if(['confirmed','rejected','code_confirmed','code_rejected'].includes(o.status)) return false;
-  if(o.session_id){
-    return visitors.some(v=>v.session_id===o.session_id&&v.last_active_at&&(Date.now()-v.last_active_at)<30000);
-  }
-  const op=(o.current_page||'').replace('.html','').replace('-fr','');
-  return visitors.some(v=>{
-    if(!v.last_active_at||(Date.now()-v.last_active_at)>30000) return false;
-    const vp=(v.current_page||'').replace('.html','').replace('-fr','');
-    return vp===op;
-  });
+  if(!o.session_id) return false;
+  return visitors.some(v=>v.session_id===o.session_id&&v.last_active_at&&(Date.now()-v.last_active_at)<30000);
 }
 
 // ACTIVE SIDEBAR
